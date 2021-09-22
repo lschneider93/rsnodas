@@ -1,6 +1,7 @@
 # History files
 .Rhistory
 .Rapp.history
+# ignore the fold MISC in the directory
 MISC/
 
 # Session Data files
