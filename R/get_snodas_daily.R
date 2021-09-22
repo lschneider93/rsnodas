@@ -384,7 +384,11 @@ get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
 
   # example of how to get delete all the empty elements of a list.
   # raster::brick(a[vapply(a, Negate(is.null), NA)])
-  map <- raster::brick(map[vapply(map, Negate(is.null), NA)])
+  # Kenneth, if you want just the list with all the maps and not in a brick
+  map <- map[vapply(map, Negate(is.null), NA)]
+
+  # This returns the raster brick, uncomment to return the raster brick
+  # map <- raster::brick(map[vapply(map, Negate(is.null), NA)])
 
   # Deletes the folder "data" in the working directory and all the it contains
   unlink("data", recursive = TRUE)
