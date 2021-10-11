@@ -1,0 +1,400 @@
+\documentclass[12pt,letterpaper,final]{article}
+
+%\usepackage{Sweave}
+\usepackage{graphicx}
+%\usepackage{url}
+\usepackage[hyphens]{url}
+\usepackage{natbib}
+%\usepackage{hyperref}
+\usepackage[hidelinks,breaklinks=true]{hyperref}
+\usepackage{caption}
+\usepackage{rotating}
+\usepackage{verbatim}
+\usepackage[title,titletoc,toc]{appendix}
+\usepackage{textcomp}
+\usepackage{wasysym}
+\usepackage{multirow}
+
+\setlength{\oddsidemargin}{0in}
+\setlength{\textwidth}{6.15in}
+%\setlength{\topmargin}{0.5in}
+\setlength{\textheight}{22cm}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\parskip}{5pt plus 2pt minus 3pt}
+
+\def\thefootnote{\fnsymbol{footnote}}
+\setcounter{footnote}{1}
+
+\renewcommand{\baselinestretch}{1.2}
+\renewcommand{\labelenumi}{(\roman{enumi})}
+
+\renewcommand{\topfraction}{1.0}
+\renewcommand{\bottomfraction}{1.0}
+\renewcommand{\textfraction}{0.0}
+\renewcommand{\floatpagefraction}{1.0}
+
+\parindent0pt
+
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+%\SweaveOpts{concordance= FALSE}
+
+%\SweaveOpts{concordance=TRUE}
+
+\begin{titlepage}
+
+\begin{center}
+{\large STAT 6560 Statistical Visualization II} \\[4cm]
+
+{\LARGE \bf Project Description} \\[1cm]
+by \\[0.5cm]
+{\bf J\"urgen Symanzik} \\[2.5cm]
+{\bf Date:} \today \\[2cm]
+{\bf Final Due Date:} Tuesday, April 27, 2021, 11:59pm (by e--mail) \\[2cm]
+
+
+UTAH STATE UNIVERSITY \\[0.5cm]
+Logan, UT \\[0.5cm]
+Spring 2021 \\[0.5cm]
+\end{center}
+
+\thispagestyle{empty}
+\vfill
+\end{titlepage}
+
+
+\newpage 
+
+
+\pagenumbering{roman}
+
+\tableofcontents
+
+
+\newpage
+
+
+%\listoftables
+%\addcontentsline{toc}{section}{List of Tables}
+%
+%\newpage
+%
+%\listoffigures
+%\addcontentsline{toc}{section}{List of Figures}
+%
+%\newpage 
+
+
+\pagenumbering{arabic}
+
+\section{General Instructions}
+
+Your project is based on the 
+{\it Data Challenge Expo} of the
+{\it American Statistical Association} (ASA),
+an annual event jointly sponsored by three ASA Sections: 
+Statistical Computing, Statistical Graphics, and Government Statistics
+(\url{https://community.amstat.org/dataexpo/home}).
+
+The web site states:
+\begin{quote}
+The theme for the 2021 challenge is ``Helping Families, Businesses, and Communities Respond to COVID-19'' (view problem statement). This year's data was selected in collaboration with the The Opportunity Project --- a technology accelerator out of the Census Open Innovation Labs, the innovation arm of the U.S. Census Bureau --- that facilitates virtual technology development sprints to catalyze the creation of digital products to address national challenges utilizing federal open data.
+
+The 2021 Data Challenge Expo's core data set is the U.S. Census Bureau's 2019 American Community Survey (ACS) 1-year Estimates, a survey that provides vital information on a yearly basis about occupations, work locations, educational attainment, housing, and other topics in geographies with populations of 65,000+. Contestants must use some portion of the ACS data but are encouraged to combine other data sources --- including the U.S. Census Bureau's COVID Pulse Surveys of Small Businesses and Households. Supplemental datasets, along with data points of contact, can be found on The Opportunity Project Data Curation Hub. Contestants can also develop digital products as part of their participation in the challenge. For a guidebook to transforming federal open data into digital tools for the American people, visit The Opportunity Project Product Development Toolkit.  
+
+Note: While the challenge's theme and associated problem statement offer a guide, contestants may address other problems of interest to them, as long as they incorporate the core data set.
+\end{quote}
+
+Additional information can be found at
+\url{https://opportunity.census.gov/get-involved/#asa}
+and
+\url{https://opportunity.census.gov/assets/files/covid-19-top-asa-problem-statement.pdf}.
+
+The required core data set(s) can be accessed at
+\url{https://www.census.gov/newsroom/press-kits/2020/acs-1year.html}.
+
+An overview of supplemental data sets can be found at
+\url{https://opportunity.census.gov/data/covid-19/}.
+Of particular interest may be data sets related to the
+coronavirus pandemic, such as
+\url{https://covid19.census.gov/}
+and
+\url{https://www.census.gov/data/experimental-data-products/household-pulse-survey.html}.
+
+
+You have to work in a group of five students 
+on this project. 
+All students are expected to frequently communicate and
+closely work together.
+However, I want to make this a project that is open
+to comments and suggestions from the other students in class as well.
+So, you have to consider suggestions in our Zoom  discussions or in Canvas made
+by the other students from this course.
+
+There are a few specific requirements and a timeline
+you have to follow. More details follow in the sections below.
+
+
+\section{Possible Research Questions}
+
+While it is mandatory to work with the 2021 Data Challenge Expo core data set 
+(see above), I would strongly recommend to bring in some of the coronavirus
+data sets.
+Ultimately, you are in charge to formulate the research questions you are going 
+to answer. Some of the questions that come to my mind are:
+\begin{itemize}
+\item How did ``red'' (Republican) and ``blue'' (Democratic) states make it through
+the pandemic so far? Are there more differences or more similarities?
+
+\item How did different population groups (White, Black, Hispanic, Asian, Other)
+make it through
+the pandemic so far? Are there more differences or more similarities?
+
+\item What is the economic effect of the pandemic on different groups of
+the population and on businesses across the United States?
+
+\end{itemize}
+
+It is up to you to identify parts of the available data sets that allow you
+to answer your research questions.
+
+As this is a course project for {\it Statistical Visualization II},
+your main focus should be on the visualization side of the data.
+Think of choropleth maps, linked micromap plots,
+comparative micromaps, conditioned choropleth maps,
+and star plots overlaid on maps as some main tools
+for your visualizations.
+The problem statement also indicates:
+``Contestants are also encouraged to
+develop digital products as part of their participation in the challenge.''
+This could be Shiny apps that allow others to explore parts of the data sets
+or some interactive plotly apps that allow to explore and investigate
+the data sets.
+
+While statistical modeling or methods from spatial statistics are not
+required for this course project, you can incorporate them if you think
+they are an essential step to produce meaningful visualizations.
+
+
+\section{Specific Instructions}
+
+\begin{itemize}
+\item Discuss responsibilities within your group of five students. 
+Which student takes on which tasks?
+What are the deadlines for these individual tasks? While you have to closely
+interact with the other students, you also have to take the lead
+on some of your own tasks. Be aware of the overall deadlines outlined below.
+
+\item All your work most be done in R. You cannot manually manipulate files and data sets.
+Your R code should be reproducible/reusable, in particular as web pages and data sets
+may be updated or corrected as needed. These are live data sets 
+from the U.S.\ Census Bureau and not just any
+data sets specifically prepared for this competition.
+Also assume that someone may run
+your R code again in a year when updates of the data have been made available.
+
+\item Immediately start exploring and processing some of the data sets. 
+What are their dimensions, which variables do they contain, which time periods
+do they cover? Are these ``raw'' (unprocessed) data sets or did they get
+get processed previously? If ``raw'', be prepared to find lots of
+outliers, invalid, or missing data points. You have to see how to fix,
+remove, or impute them. Creating basic tabular overviews and conducting some
+basic exploratory data analysis (both graphically and numerically)
+always is a good idea.
+
+
+\end{itemize}
+
+
+\newpage
+
+
+\section{Timeline}
+
+\begin{itemize}
+\item Two of you have to give a short 10 to 15~min progress report each week,
+whenever possible on Thursdays until {\bf Thursday 4/8} at the end of our Zoom discussion meetings. 
+As several of you take this course as an online course and do not participate
+in those Zoom discussion meetings, we will have to schedule a different time on Thursday
+or Friday in those weeks where one (or both) of the presenters are online students for this course.
+
+In these short progress reports, 
+you should summarize what your group has done in the past week and
+what your next planned steps are. The other students in class and I may ask questions and
+make suggestions what to do next. We all should agree what the next steps and priorities are.
+
+Your tasks for week 1 (until {\bf Thursday 3/4}) are to decide on subtasks for each group
+member. The tasks for week 2 (until {\bf Thursday 3/11}) will be to identify parts of the provided data sets
+that are relevant for your research questions and to provide some exploratory data analysis results
+as outlined above. 
+
+Please prepare a short written overview of your weekly progress report. This can be two or three slides
+or a basic \LaTeX\ document of not more than two pages.
+
+The following students have to give the weekly progress reports:
+\begin{itemize}
+\item Week 1 (on {\bf Thursday 3/4}): Adelyn \& Brayden
+\item Week 2 (around {\bf Thursday 3/11}): Logan \& Kristen
+\item Week 3 (on {\bf Thursday 3/18}): Xiaomeng \& Adelyn
+\item Week 4 (around {\bf Thursday 3/25}): Brayden \& Logan
+\item Week 5 (around {\bf Thursday 4/1}): Kristen \& Xiaomeng
+\item Week 6 (around {\bf Thursday 4/8}): 2 Students of your choice
+\end{itemize}
+All other students are welcome to attend and provide to the discussions in a week
+where they are not one of the two presenters.
+
+
+\item Around {\bf Monday 4/12}, you have to give a 30~min presentation of your final results.
+This should be a formal scientific presentation with a content slide, an introduction,
+and a summary of the data sets being used (and how they
+were processed on your side).
+
+You are not the first ones who work with these data sets. See what the
+U.S.\ Census Bureau has posted about their data sets ---
+and what others may have published based on these data in previous years
+(do a Google scholar search; I noticed several scientific articles related
+to the American Community Survey). You should provide a brief overview
+of this published work in your introduction.
+
+The main part of your presentation should be a summary of the
+visualization methods and R packages you have used, and obviously a presentation of your results.
+End with a discussion and outlook on things you would have liked to do,
+but were not able to do given the time limits of this project.
+If you developed anything interactive via Shiny or plotly,
+end with a live demonstration where you demonstrate your app.
+Allow other students and me to ask questions what we would like you
+to do with your app, e.g., ``can you show the same, but now for Michigan, please?''
+
+It is not necessary to come up with final answers to all initial research questions.
+Use my \LaTeX\ Beamer slides (in Presentation.zip) as a template for this presentation.
+Please e--mail your presentation slides (just the pdf version)
+at least one hour {\bf prior} to your presentation around {\bf Monday 4/12}.
+
+While there could be a ``narrator'' for this presentation, each student 
+must contribute to it and report about the main part to which he/she contributed.
+All students must be able to answer general questions about the project
+and specific questions about their main part.
+
+\item As a reminder, this project is based on a competition from the
+American Statistical Association. We have to decide by {\bf Tuesday 4/13}
+if one (or more) of you want to take the lead on this project and enter
+it into the ASA competition. If so, a short placeholder abstract has to be
+submitted by {\bf Wednesday 4/14}. 
+
+USU students participated in Data Expos four times in the past.
+Most successful were Jill Lundell and Brennan Bean who won
+second place in 2018. All past USU participants ended up with publications,
+based on their participation (journal and/or conference proceedings articles).
+We will look at Data Expo submissions from these students to determine
+what makes a successful and less successful contribution if one (or more)
+of you decide to enter your work into the ASA competition.
+
+\item On {\bf Tuesday 4/27} at 11:59pm, your final written report is due. Likely you have
+to make a careful decision what to present in your written report. In a presentation,
+we can often present a lot of additional information that won't make it into the
+final written report due to space (i.e., page) limitations.
+
+Use my \LaTeX\ template (in ProceedingsPaper.zip) as a template for this final report.
+
+\end{itemize}
+
+
+\section{Grading}
+
+The final presentation in class around {\bf Monday 4/12} is worth 40\% and the final written report
+due on {\bf Tuesday 4/27} is worth 60\% of your total score for this project.
+
+
+\section{Additional Requirements}
+
+\begin{itemize}
+\item It is up to you how to split the individual tasks. 
+
+\item {\bf When you reach out to me via e--mail, make sure to cc all other group members.}
+This also holds when you submit files via e--mail to me. This guarantees that
+all group members know what has been submitted and whether submissions
+were made by the deadline. I will also reply to the entire group.
+The only two exceptions to this are when you have personal questions or concerns
+about one of the other group members and when you report 
+your breakdown of everybody's percent--wise contribution to the project.
+
+\item It is not expected that each group member contributes exactly the same amount
+of time to a group project. However, no single group member is allowed to
+contribute more than 25\% of the overall work for this project. A group
+member that contributes less than 15\% of the overall work to this project
+will get individual point deductions. You have to provide me (via e--mail) with 
+an estimated percentage of everyone's contributions to this project
+and the kind of contributions everyone made.
+This overview is due on {\bf Wednesday 4/28}.
+
+\item Your 30~min presentation around {\bf Monday 4/12} should be created via
+\LaTeX\ Beamer. 
+Use my \LaTeX\ Beamer slides (in Presentation.zip) as a template for this presentation.
+You only have to turn in
+your final resulting pdf file.
+
+\item A final 6--page written report is due on {\bf Tuesday 4/27} at 11:59pm. This has
+to follow the JSM formatting requirements from the American Statistical Association (ASA).
+These 6 pages must contain everything from an abstract, keywords, the main
+sections of your report, all figures and tables, and the references.
+Use my \LaTeX\ template (in ProceedingsPaper.zip) as a template for this final report.
+In addition, you have to arrange your R files in a
+meaningful way as in Appendix~\ref{AppendixWithRCode} of your main report. There is no page limit
+for this appendix. \LaTeX\ commands such as {\it verbatiminput} exist and allow you to create your
+R code independently and only include it into a document at the very last stage.
+You have to turn in your final pdf file and all source files in a single zip file via e--mail.
+
+\item Please e--mail your breakdown of 
+everybody's percent--wise contribution to
+the project and the individual responsibilities immediately after the
+submission of your written report on {\bf Wednesday 4/28}. {\bf You should not cc other group
+members in this e--mail and just send it to me.}
+See Appendix~\ref{Contributions} for such a breakdown (but without any percentages).
+This is common for publications in the medical field. Apparently,
+I am ``J.S.''.
+
+\item {\bf Whenever you have questions or need clarifications, reach out to me
+via e--mail or schedule a Zoom meeting. Good luck!}
+
+\end{itemize}
+
+
+\newpage
+
+
+\begin{appendices}
+
+
+\section{Rnw File for the Project}\label{AppendixWithRCode}
+
+This appendix contains the Rnw file for this project description:
+
+{
+\scriptsize
+\verbatiminput{Project.Rnw}
+}
+
+
+\newpage
+
+
+\section{Author Contributions}\label{Contributions}
+
+G.F. conceived the research, wrote the original manuscript, the
+revised manuscript, and the response letter, and addressed the
+reviewer comments; X.D. created the computer code, performed
+the data analyses and created the figures; J.S. fine-tuned the figures
+and verified the reproducibility of the results; S.B. performed
+the STRUCTURE analysis and verified the biological interpretations;
+all authors participated in discussions, read and revised the different
+versions of the manuscript and the response letter, and agreed
+to the submission.
+
+
+\end{appendices}
+
+
+\end{document}
+

@@ -1,0 +1,90 @@
+################################################################################
+########  Plotting the difference of those stations that have data    ##########
+################################################################################
+try <- stations_2ob[, c("april_2004_WESD", "april_2005_WESD",
+                        "april_2006_WESD", "april_2007_WESD",
+                        "april_2008_WESD", "april_2009_WESD",
+                        "april_2010_WESD", "april_2011_WESD",
+                        "april_2012_WESD", "april_2013_WESD",
+                        "april_2014_WESD", "april_2015_WESD",
+                        "april_2016_WESD", #"april_2017_WESD",
+                        "april_2018_WESD", "april_2019_WESD",
+                        "april_2020_WESD", "april_2021_WESD")]
+short_test <- data.frame(WESD = unlist(try))
+(dim(short_test)[1]/155)
+# station ID vector
+station_long <- rep(stations_2ob$ID, times = length(years))
+short_test$ID <- station_long
+
+# elevation vector
+elevation_long <- rep(stations_2ob$ELEVATION, times = length(years))
+short_test$ELEVATION <- elevation_long
+
+# latitude vector
+lat_vector <- rep(stations_2ob$LATITUDE, times = length(years))
+short_test$LATITUDE <- lat_vector
+
+# longitude vector
+long_vector <- rep(stations_2ob$LONGITUDE, times = length(years))
+short_test$LONGITUDE <- long_vector
+
+#years vector
+y <- rep(years, each = (length(stations_2ob$ID)))
+short_test$year <- y
+short_test$year <- factor(short_test$year,
+                          levels = c('2004','2005', '2006',
+                                     '2007','2008', '2009',
+                                     '2010','2011', '2012',
+                                     '2013','2014', '2015',
+                                     '2016',#'2017',
+                                     '2018',
+                                     '2019','2020', '2021'))
+
+
+
+
+
+
+
+###################
+try <- stations_2ob[, c("april_2004_MODEL", "april_2005_MODEL",
+                        "april_2006_MODEL", "april_2007_MODEL",
+                        "april_2008_MODEL", "april_2009_MODEL",
+                        "april_2010_MODEL", "april_2011_MODEL",
+                        "april_2012_MODEL", "april_2013_MODEL",
+                        "april_2014_MODEL", "april_2015_MODEL",
+                        "april_2016_MODEL", #"april_2017_MODEL",
+                        "april_2018_MODEL", "april_2019_MODEL",
+                        "april_2020_MODEL", "april_2021_MODEL")]
+test1 <- data.frame(MODEL = unlist(try))
+short_test$MODEL <- test1$MODEL
+
+
+###################
+try <- stations_2ob[, c("april_2004_DIFFERENCE", "april_2005_DIFFERENCE",
+                        "april_2006_DIFFERENCE", "april_2007_DIFFERENCE",
+                        "april_2008_DIFFERENCE", "april_2009_DIFFERENCE",
+                        "april_2010_DIFFERENCE", "april_2011_DIFFERENCE",
+                        "april_2012_DIFFERENCE", "april_2013_DIFFERENCE",
+                        "april_2014_DIFFERENCE", "april_2015_DIFFERENCE",
+                        "april_2016_DIFFERENCE", #"april_2017_DIFFERENCE",
+                        "april_2018_DIFFERENCE", "april_2019_DIFFERENCE",
+                        "april_2020_DIFFERENCE", "april_2021_DIFFERENCE")]
+test2 <- data.frame(DIFFERENCE = unlist(try))
+short_test$DIFFERENCE <- test2$DIFFERENCE
+
+short_df <- short_test
+short_df_copy <- short_test
+
+(short_df$WESD - short_df$MODEL) == short_df$DIFFERENCE
+any((short_df$WESD - short_df$MODEL) != short_df$DIFFERENCE)
+
+sp_wobs1 <- ggplot(data = short_df, aes(x = ELEVATION, y = DIFFERENCE)) + 
+  geom_point(shape = 1)# + 
+#facet_wrap(~ year, nrow = 3)
+
+# ggplot(data = short_df, aes(x = ELEVATION, y = DIFFERENCE, colour = year)) + 
+#   geom_point(shape = 1)
+
+sp_wobs1
+
