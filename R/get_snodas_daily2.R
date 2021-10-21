@@ -28,15 +28,16 @@
 #' maps into a list and combines them all into a RasterBrick.
 #'
 #' @export
-get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
+get_snodas_daily2 <- function(dates = c("2010-01-01", "2012-4-15"),
                              masked = TRUE,
                              data = c('swe', 'SP', "SD", "SPT",
                                       'bss', 'melt', 'SPS', 'NSP'),
                              permanent = "permanent folder") {
 
   # Create a new folder called "temp". This will be deleted at the end
-  dir.create("data")
-  dir.create(permanent) # User can specify what this permanent folder is called
+  try(dir.create("temp_data"))
+  # User can specify what this permanent folder is called
+  try(dir.create(permanent))
 
   # save old working directory file path
   oldwd <- getwd()
@@ -55,7 +56,7 @@ get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
 
   # Double-check to make sure the length of dates, months and years are the same
   #=============================================================================
-  for (i in 1:length(dates)){
+  for (i in 1:length(dates)) {
     if (nchar(date[i]) == 1) {
       date[i] = paste(rep(0, 1), date[i], sep = "")
     } else if (nchar(date[i]) == 2) {
@@ -103,32 +104,20 @@ get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
     } else if (nchar(year[i]) == 4) {
       year[i] = year[i]
     } else stop("Error: Year must be in the form of YYYY/MM/dd")
-
-    #=============================================================================
-
-    # get the url from the day, month, and year
-    if(masked == TRUE){
-      url[i] <- paste("ftp://sidads.colorado.edu/DATASETS/NOAA/G02158/masked/",
-                      year[i], "/", month[i], "_", month1[i],
-                      "/SNODAS_", year[i], month[i], date[i], ".tar", sep = '')
-      prefix <- "us"
-    } else if (masked == FALSE){
-      url[i] <- paste("ftp://sidads.colorado.edu/DATASETS/NOAA/G02158/unmasked/",
-                      year[i], "/", month[i], "_", month1[i],
-                      "/SNODAS_unmasked", "_", year[i], month[i], date[i], ".tar", sep = '')
-      prefix <- "zz"
-    }
-    else stop("Error: Masked needs to be TRUE/FALSE")
   }
+
+  if(masked == TRUE) {
+    prefix <- "us"
+  } else if (masked == FALSE) {
+    prefix <- "zz"
+  } else stop("Error: Masked needs to be TRUE/FALSE")
+
+  urls <- get_snodas_urls(dates = dates, masked = masked)
 
   # Download all of the SNODAS data files and put them in the data folder
   #=============================================================================
-  for (i in 1:length(dates)){
-    destfile <- paste(oldwd, "/data", "/urlfile", i, ".tar", sep = "")
-    download.file(url[i], destfile = destfile)
-    utils::untar(paste("data/urlfile", i, ".tar", sep = ""),
-                 exdir = paste(oldwd, "/data", sep = ""))
-  }
+  download_snodas_urls(dates = dates, masked = masked, urls = urls)
+
 
   # Note that each data has 2 files.  Note that this area can be simplified
   swe <- paste(prefix, "_ssmv11034tS__T0001TTNATS",
@@ -222,16 +211,16 @@ get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
   # The elements of the List that are empty will be deleted at the end.
   map <- vector("list", 8 * length(dates))
 
-  for (i in 1:length(dates)){
+  for (i in 2:length(dates)){
     # if any of the Snow Water Equivalent
     if(any(data == "SWE") | any(data == "swe")){
 
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/", swe1[i], sep = ""),
+        filename = paste(oldwd, "/temp_data/", swe1[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/", swe[i], sep = ""),
         remove = TRUE))
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/",
+        filename = paste(oldwd, "/temp_data/",
                          swe2[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/",
                          swe3[i], sep = ""),
@@ -244,11 +233,11 @@ get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
     # Snow precipatation 24 hrs and put it in a list
     if(any(data == "SP") | any(data == "sp")){
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/", sp1[i], sep = ""),
+        filename = paste(oldwd, "/temp_data/", sp1[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/", sp[i], sep = ""),
         remove = TRUE))
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/",
+        filename = paste(oldwd, "/temp_data/",
                          sp2[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/",
                          sp3[i], sep = ""),
@@ -261,11 +250,11 @@ get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
     # Modeled Snow Depth
     if(any(data == "sd") | any(data == "SD")){
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/", msd1[i], sep = ""),
+        filename = paste(oldwd, "/temp_data/", msd1[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/", msd[i], sep = ""),
         remove = TRUE))
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/",
+        filename = paste(oldwd, "/temp_data/",
                          msd2[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/",
                          msd3[i], sep = ""),
@@ -278,11 +267,11 @@ get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
     # Snowpack average temperature
     if(any(data == "SPT") | any(data == "spt")){
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/", savetemp1[i], sep = ""),
+        filename = paste(oldwd, "/temp_data/", savetemp1[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/", savetemp[i], sep = ""),
         remove = TRUE))
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/",
+        filename = paste(oldwd, "/temp_data/",
                          savetemp2[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/",
                          savetemp3[i], sep = ""),
@@ -295,11 +284,11 @@ get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
     # Modeled blowing snow sublimation rate.
     if(any(data == "bss") | any(data == "BSS")){
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/", sublim1[i], sep = ""),
+        filename = paste(oldwd, "/temp_data/", sublim1[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/", sublim[i], sep = ""),
         remove = TRUE))
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/",
+        filename = paste(oldwd, "/temp_data/",
                          sublim2[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/",
                          sublim3[i], sep = ""),
@@ -312,16 +301,16 @@ get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
     # Modeled melt rate, 24-hour total
     if(any(data == "melt") | any(data == "Melt") | any(data == "MELT")){
       b <- try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/", meltrate1[i], sep = ""),
+        filename = paste(oldwd, "/temp_data/", meltrate1[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/", meltrate[i], sep = ""),
         remove = TRUE), silent = TRUE)
       if(inherits(b, "try-error")){
         try(R.utils::gunzip(
-          filename = paste(oldwd, "/data/", meltrate5[1], sep = ""),
+          filename = paste(oldwd, "/temp_data/", meltrate5[1], sep = ""),
           destname = paste(oldwd, "/", permanent, "/", meltrate4[i], sep = ""),
           remove = TRUE))
         try(R.utils::gunzip(
-          filename = paste(oldwd, "/data/",
+          filename = paste(oldwd, "/temp_data/",
                            meltrate6[i], sep = ""),
           destname = paste(oldwd, "/", permanent, "/",
                            meltrate7[i], sep = ""),
@@ -332,11 +321,11 @@ get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
       }
       else {
         #R.utils::gunzip(
-        #filename = paste(oldwd, "/data/", meltrate1[i], sep = ""),
+        #filename = paste(oldwd, "/temp_data/", meltrate1[i], sep = ""),
         #destname = paste(oldwd, "/", permanent, "/", meltrate[i], sep = ""),
         #remove = TRUE)
         try(R.utils::gunzip(
-          filename = paste(oldwd, "/data/",
+          filename = paste(oldwd, "/temp_data/",
                            meltrate2[i], sep = ""),
           destname = paste(oldwd, "/", permanent, "/",
                            meltrate3[i], sep = ""),
@@ -350,11 +339,11 @@ get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
     # Modeled snowpack sublimation rate, 24-hour total
     if(any(data == "SPS") | any(data == "sps")){
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/", spsublim1[i], sep = ""),
+        filename = paste(oldwd, "/temp_data/", spsublim1[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/", spsublim[i], sep = ""),
         remove = TRUE))
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/",
+        filename = paste(oldwd, "/temp_data/",
                          spsublim2[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/",
                          spsublim3[i], sep = ""),
@@ -367,11 +356,11 @@ get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
     # Non-snow precipitation, 24-hour total
     if(any(data == "NSP") | any(data == "nsp")){
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/", nsprecip1[i], sep = ""),
+        filename = paste(oldwd, "/temp_data/", nsprecip1[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/", nsprecip[i], sep = ""),
         remove = TRUE))
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/data/",
+        filename = paste(oldwd, "/temp_data/",
                          nsprecip2[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/",
                          nsprecip3[i], sep = ""),
@@ -391,7 +380,7 @@ get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
   # map <- raster::brick(map[vapply(map, Negate(is.null), NA)])
 
   # Deletes the folder "data" in the working directory and all the it contains
-  unlink("data", recursive = TRUE)
+  unlink("temp_data", recursive = TRUE)
 
   return(map)
 }
