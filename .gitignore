@@ -1,6 +1,7 @@
 # History files
 .Rhistory
 .Rapp.history
+^.*\.DS_Store$
 # ignore the fold MISC in the directory
 MISC/
 

@@ -27,6 +27,10 @@
 #' The function unzips the selected data files and stores the specified
 #' maps into a list and combines them all into a RasterBrick.
 #'
+#' @importFrom utils download.file untar
+#' @importFrom R.utils gunzip
+#' @importFrom lubridate day month year
+#'
 #' @export
 get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
                              masked = TRUE,
@@ -125,7 +129,7 @@ get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
   #=============================================================================
   for (i in 1:length(dates)){
     destfile <- paste(oldwd, "/data", "/urlfile", i, ".tar", sep = "")
-    download.file(url[i], destfile = destfile)
+    utils::download.file(url[i], destfile = destfile)
     utils::untar(paste("data/urlfile", i, ".tar", sep = ""),
                  exdir = paste(oldwd, "/data", sep = ""))
   }

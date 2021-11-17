@@ -7,6 +7,9 @@
 #'
 #' @return a vector of urls that are in the same order as the dates given.
 #'
+#' @importFrom utils download.file untar
+#' @importFrom lubridate day month year
+#'
 #' @details This function takes dates in the form of YYYY-MM-DD and returns a
 #'   vector of urls that can be used to download the information for the
 #'   specific dates given.
@@ -96,7 +99,7 @@ download_snodas_urls <- function(dates, masked, urls) {
   for (i in 1:length(dates)) {
     destfile <- paste(oldwd, "/data",  "/SNODAS_", year[i], month[i], date[i],
                       ".tar", sep = "")
-    download.file(urls[i], destfile = destfile, , mod = "wb")
+    utils::download.file(urls[i], destfile = destfile, , mod = "wb")
     utils::untar(paste("data/SNODAS_", year[i], month[i], date[i],
                        ".tar", sep = ""),
                  exdir = paste(oldwd, "/data", sep = ""))

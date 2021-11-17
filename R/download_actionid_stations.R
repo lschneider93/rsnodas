@@ -1,12 +1,14 @@
 #' Download the Stations with ActionID
 #'
-#' @param dates date with YYYY-MM-dd written as a six digit character string
+#'
 #'
 #' @return a dataframe with station names with action Ids
 #'
 #' @details This function helps with getting stations that have an Action Id.
 #'   The stations with an Action Id are in both the NRCS and GHCND.
 #'
+#' @importFrom RCurl getURL
+#' @importFrom utils read.csv
 #' @export
 
 download_actionid_stations <- function(){
@@ -17,7 +19,7 @@ download_actionid_stations <- function(){
   snowURL <- RCurl::getURL(URL)
   text_station_info <- unlist(strsplit(snowURL, '\n'))
   first_line <- min(grep('^[[:alpha:]]', text_station_info))
-  snowCSV <- read.csv(textConnection(snowURL), skip = first_line - 1)
+  snowCSV <- utils::read.csv(textConnection(snowURL), skip = first_line - 1)
 
   return(snowCSV)
   # dim(snowCSV)

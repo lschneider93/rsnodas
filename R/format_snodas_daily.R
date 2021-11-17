@@ -1,17 +1,17 @@
 #' Formats dates into YYYY-MM-DD.
 #'
-#' @param day day will be written as a 1 or 2 digit character string
-#' @param month month will be written as a 1 or 2 digit character string
-#' @param year year will be written as a 4 digit character string
+#' This function creates a temporary folder and downloads data
+#'   from the SNODAS website for the inputed date, map type, and data map
+#'   that the user provides. This data is stored in the temporary folder.
+#'   The function unzips the selected data files and stores the specified
+#'   maps into a list.
+#'
+#' @param day a 1 or 2 digit character string (DD) or (D)
+#' @param month a 1 or 2 digit character string (MM) or (M)
+#' @param year a 4 digit character string (YYYY)
 #'
 #' @return a list of rasters with elements corresponding to the
 #'   input vaiable "data".
-#'
-#' @details This function creates a temporary folder and downloads data
-#' from the SNODAS website for the inputed date, map type, and data map
-#' that the user provides. This data is stored in the temporary folder.
-#' The function unzips the selected data files and stores the specified
-#' maps into a list.
 #'
 #' @export
 format_snodas_daily <- function(day = 1:2,

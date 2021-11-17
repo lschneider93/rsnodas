@@ -6,7 +6,7 @@
 #'
 #' @param data data is the type of maps wanted. There are 8 options:
 #'   "SWE" for Snow-water-equivalent. "
-#'   "SP" for Snow precipatation 24 hrs
+#'   "SP" for Snow precipitation 24 hrs
 #'   "SD" for Modeled Snow Depth
 #'   "SPT" for Snowpack average temperature
 #'   "BSS" for Modeled blowing snow sublimation rate
@@ -25,6 +25,8 @@
 #' that the user provides. This data is stored in the permanent folder.
 #' The function unzips the selected data files and stores the specified
 #' maps into a list and combines them all into a RasterBrick.
+#'
+#' @importFrom raster raster
 #'
 #' @export
 get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),

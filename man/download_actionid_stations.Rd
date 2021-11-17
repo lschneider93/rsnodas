@@ -6,9 +6,6 @@
 \usage{
 download_actionid_stations()
 }
-\arguments{
-\item{dates}{date with YYYY-MM-dd written as a six digit character string}
-}
 \value{
 a dataframe with station names with action Ids
 }

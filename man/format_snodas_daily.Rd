@@ -7,23 +7,20 @@
 format_snodas_daily(day = 1:2, month = 4:5, year = 2011:2012)
 }
 \arguments{
-\item{day}{day will be written as a 1 or 2 digit character string}
+\item{day}{a 1 or 2 digit character string (DD) or (D)}
 
-\item{month}{month will be written as a 1 or 2 digit character string}
+\item{month}{a 1 or 2 digit character string (MM) or (M)}
 
-\item{year}{year will be written as a 4 digit character string}
+\item{year}{a 4 digit character string (YYYY)}
 }
 \value{
 a list of rasters with elements corresponding to the
   input vaiable "data".
 }
 \description{
-Formats dates into YYYY-MM-DD.
-}
-\details{
 This function creates a temporary folder and downloads data
-from the SNODAS website for the inputed date, map type, and data map
-that the user provides. This data is stored in the temporary folder.
-The function unzips the selected data files and stores the specified
-maps into a list.
+  from the SNODAS website for the inputed date, map type, and data map
+  that the user provides. This data is stored in the temporary folder.
+  The function unzips the selected data files and stores the specified
+  maps into a list.
 }

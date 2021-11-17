@@ -1,4 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^.*\.DS_Store$
 MISC
 Data
