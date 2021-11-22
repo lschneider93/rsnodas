@@ -27,17 +27,20 @@
 #' The function unzips the selected data files and stores the specified
 #' maps into a list and combines them all into a RasterBrick.
 #'
+#' @importFrom utils download.file untar
+#' @importFrom R.utils gunzip
+#' @importFrom lubridate day month year
+#'
 #' @export
-get_snodas_daily2 <- function(dates = c("2010-01-01", "2012-4-15"),
+get_snodas_daily <- function(dates = c("2010-01-01", "2012-4-15"),
                              masked = TRUE,
                              data = c('swe', 'SP', "SD", "SPT",
                                       'bss', 'melt', 'SPS', 'NSP'),
                              permanent = "permanent folder") {
 
   # Create a new folder called "temp". This will be deleted at the end
-  try(dir.create("temp_data"))
-  # User can specify what this permanent folder is called
-  try(dir.create(permanent))
+  dir.create("temp_data")
+  dir.create(permanent) # User can specify what this permanent folder is called
 
   # save old working directory file path
   oldwd <- getwd()
@@ -104,22 +107,40 @@ get_snodas_daily2 <- function(dates = c("2010-01-01", "2012-4-15"),
     } else if (nchar(year[i]) == 4) {
       year[i] = year[i]
     } else stop("Error: Year must be in the form of YYYY/MM/dd")
+
+    #=============================================================================
+
+    # get the url from the day, month, and year
+    if(masked == TRUE){
+      url[i] <- paste("ftp://sidads.colorado.edu/DATASETS/NOAA/G02158/masked/",
+                      year[i], "/", month[i], "_", month1[i],
+                      "/SNODAS_", year[i], month[i], date[i], ".tar", sep = '')
+      prefix <- "us"
+    } else if (masked == FALSE){
+      url[i] <- paste("ftp://sidads.colorado.edu/DATASETS/NOAA/G02158/unmasked/",
+                      year[i], "/", month[i], "_", month1[i],
+                      "/SNODAS_unmasked", "_", year[i], month[i], date[i], ".tar", sep = '')
+      prefix <- "zz"
+    }
+    else stop("Error: Masked needs to be TRUE/FALSE")
   }
 
-  if(masked == TRUE) {
-    prefix <- "us"
-  } else if (masked == FALSE) {
-    prefix <- "zz"
-  } else stop("Error: Masked needs to be TRUE/FALSE")
-
-  urls <- get_snodas_urls(dates = dates, masked = masked)
 
   # Download all of the SNODAS data files and put them in the data folder
   #=============================================================================
-  download_snodas_urls(dates = dates, masked = masked, urls = urls)
+  #### This one works well!  Rewrite this whole function!  I'm kinda mad about that!
+  # https://stackoverflow.com/questions/48927391/trouble-downloading-tar-in-r
+  for (i in seq_len(length(dates))) {
+    vncTar <- paste(oldwd, "vnc.tar", sep = "//") # Create destination file name
+    download.file(url[i], vncTar, mode = "wb")
+    files <- utils::untar(vncTar, compress=TRUE, list=TRUE) # Saves list of file names
+    utils::untar(vncTar, compress=TRUE, exdir = paste(oldwd, "/temp_data/", sep = "")) # Extracts the files
+  }
 
 
-  # Note that each data has 2 files.  Note that this area can be simplified
+  # Download all of the SNODAS data files and put them in the permanent folder
+  #=============================================================================
+  # Note that each data has 2 files.  Note that this area can be simplified
   swe <- paste(prefix, "_ssmv11034tS__T0001TTNATS",
                year, month, date, "05HP001.txt", sep = '')
   swe1 <- paste(prefix, "_ssmv11034tS__T0001TTNATS",
@@ -165,7 +186,7 @@ get_snodas_daily2 <- function(dates = c("2010-01-01", "2012-4-15"),
   sublim3 <- paste(prefix, "_ssmv11039lL00T0024TTNATS",
                    year, month, date, "05DP000.dat", sep = '')
 
-  # There are two types of files for the melt rate.  They went from Hourly to
+  # There are two types of files for the melt rate.  They went from Hourly to
   # Daily in some years and other years that they just changed it.
 
   # THIS? us_ssmv11044bS__T0001TTNATS2010010105HP000.txt
@@ -219,12 +240,12 @@ get_snodas_daily2 <- function(dates = c("2010-01-01", "2012-4-15"),
         filename = paste(oldwd, "/temp_data/", swe1[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/", swe[i], sep = ""),
         remove = TRUE))
+
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/temp_data/",
-                         swe2[i], sep = ""),
-        destname = paste(oldwd, "/", permanent, "/",
-                         swe3[i], sep = ""),
+        filename = paste(oldwd, "/temp_data/", swe2[i], sep = ""),
+        destname = paste(oldwd, "/", permanent, "/", swe3[i], sep = ""),
         remove = TRUE))
+
       map[[(8*i) - 7]] <- raster::raster(paste(oldwd, "/",
                                                permanent, "/",
                                                swe[i], sep = ""))
@@ -236,12 +257,12 @@ get_snodas_daily2 <- function(dates = c("2010-01-01", "2012-4-15"),
         filename = paste(oldwd, "/temp_data/", sp1[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/", sp[i], sep = ""),
         remove = TRUE))
+
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/temp_data/",
-                         sp2[i], sep = ""),
-        destname = paste(oldwd, "/", permanent, "/",
-                         sp3[i], sep = ""),
+        filename = paste(oldwd, "/temp_data/", sp2[i], sep = ""),
+        destname = paste(oldwd, "/", permanent, "/", sp3[i], sep = ""),
         remove = TRUE))
+
       map[[(8*i) - 6]] <- raster::raster(paste(oldwd, "/",
                                                permanent, "/",
                                                sp[i], sep = ""))
@@ -253,12 +274,12 @@ get_snodas_daily2 <- function(dates = c("2010-01-01", "2012-4-15"),
         filename = paste(oldwd, "/temp_data/", msd1[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/", msd[i], sep = ""),
         remove = TRUE))
+
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/temp_data/",
-                         msd2[i], sep = ""),
-        destname = paste(oldwd, "/", permanent, "/",
-                         msd3[i], sep = ""),
+        filename = paste(oldwd, "/temp_data/", msd2[i], sep = ""),
+        destname = paste(oldwd, "/", permanent, "/", msd3[i], sep = ""),
         remove = TRUE))
+
       map[[(8*i) - 5]] <- raster::raster(paste(oldwd, "/",
                                                permanent, "/",
                                                msd[i], sep = ""))
@@ -270,12 +291,12 @@ get_snodas_daily2 <- function(dates = c("2010-01-01", "2012-4-15"),
         filename = paste(oldwd, "/temp_data/", savetemp1[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/", savetemp[i], sep = ""),
         remove = TRUE))
+
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/temp_data/",
-                         savetemp2[i], sep = ""),
-        destname = paste(oldwd, "/", permanent, "/",
-                         savetemp3[i], sep = ""),
+        filename = paste(oldwd, "/temp_data/", savetemp2[i], sep = ""),
+        destname = paste(oldwd, "/", permanent, "/", savetemp3[i], sep = ""),
         remove = TRUE))
+
       map[[(8*i) - 4]] <- raster::raster(paste(oldwd, "/",
                                                permanent, "/",
                                                savetemp[i], sep = ""))
@@ -287,11 +308,10 @@ get_snodas_daily2 <- function(dates = c("2010-01-01", "2012-4-15"),
         filename = paste(oldwd, "/temp_data/", sublim1[i], sep = ""),
         destname = paste(oldwd, "/", permanent, "/", sublim[i], sep = ""),
         remove = TRUE))
+
       try(R.utils::gunzip(
-        filename = paste(oldwd, "/temp_data/",
-                         sublim2[i], sep = ""),
-        destname = paste(oldwd, "/", permanent, "/",
-                         sublim3[i], sep = ""),
+        filename = paste(oldwd, "/temp_data/", sublim2[i], sep = ""),
+        destname = paste(oldwd, "/", permanent, "/", sublim3[i], sep = ""),
         remove = TRUE))
       map[[(8*i) - 3]] <- raster::raster(paste(oldwd, "/",
                                                permanent, "/",
@@ -315,13 +335,14 @@ get_snodas_daily2 <- function(dates = c("2010-01-01", "2012-4-15"),
           destname = paste(oldwd, "/", permanent, "/",
                            meltrate7[i], sep = ""),
           remove = TRUE))
+
         map[[(8*i) - 2]] <- raster::raster(paste(oldwd, "/",
                                                  permanent, "/",
                                                  meltrate4[i], sep = ""))
       }
       else {
         #R.utils::gunzip(
-        #filename = paste(oldwd, "/temp_data/", meltrate1[i], sep = ""),
+        #filename = paste(oldwd, "/data/", meltrate1[i], sep = ""),
         #destname = paste(oldwd, "/", permanent, "/", meltrate[i], sep = ""),
         #remove = TRUE)
         try(R.utils::gunzip(
@@ -380,6 +401,7 @@ get_snodas_daily2 <- function(dates = c("2010-01-01", "2012-4-15"),
   # map <- raster::brick(map[vapply(map, Negate(is.null), NA)])
 
   # Deletes the folder "data" in the working directory and all the it contains
+  unlink("vnc.tar", recursive = TRUE)
   unlink("temp_data", recursive = TRUE)
 
   return(map)
@@ -387,3 +409,6 @@ get_snodas_daily2 <- function(dates = c("2010-01-01", "2012-4-15"),
 
 
 # share with kinekenneth48
+
+
+
