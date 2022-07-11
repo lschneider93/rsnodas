@@ -1,17 +1,23 @@
 Package: rsnodas
 Type: Package
-Title: Downloads SNODAS maps 
+Title: Download and Ensemble SWE prediction functions
 Version: 0.1.0
 Author: Logan Schneider
-Maintainer: The package maintainer <Logan.Schneider@usu.edu>
-Description: This helps a user format and download data maps of United States.
-    The maps can be snow water equivalent, Snow precipatation 24 hrs,
-    modeled Snow Depth, Snowpack average temperature, 
-    blowing snow sublimation rate, modeled melt rate, snowpack sublimation rate,
-    and Non-snow precipitation.
-Imports:
-    R.utils, RCurl, lubridate, raster, ncdf4
+Maintainer: The package maintainer <loganschneider93@gmail.com>
+Description: This package will aid in downloading, clean, process, and make 
+    gridded or raster-like predictions.
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2
+Imports:
+    R.utils,
+    lubridate,
+    stars,
+    xfun
+Depends: 
+    R (>= 2.10)
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr

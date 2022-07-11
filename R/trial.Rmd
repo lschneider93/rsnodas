@@ -1,0 +1,126 @@
+---
+title: "Introduction"
+author: "Logan Schneider"
+date: '2022-06-30'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(improved)
+```
+
+## Downloading data from SNODAS using download_snodas_data()
+
+This function allows users to download mapped predictions throughout the United States. Inputs are the following: dates, masked, overwrite, remove_zip, data_saved, out_dir, and GTiff.  This allows users to download any of the information from SNODAS and store it on their computer. 
+
+```{r snodas}
+# Download SNODAS data for 04/01/2015 
+snodas_2015 <- improved::download_snodas_data(
+  dates = improved::format_dates(day = 1, month = 4, year = 2015),
+                                              masked = TRUE,
+                                              remove_zip = TRUE,
+                                              data_saved = c("swe"),
+                                              out_dir = "snodas_trial")
+
+# get the pipe function from magrittr, this will be used for a few things
+"%>%" <- magrittr::"%>%"
+
+# Get an shape of utah from the maps package
+ut_map <- maps::map("state", plot = FALSE, fill = TRUE) %>%
+  sf::st_as_sf() %>%
+  dplyr::filter(ID == "utah") %>%
+  sf::st_transform(crs = sf::st_crs(snodas_2015$`swe_2015-04-01`))
+
+# Crop the maps to just the state of Utah
+snodas_ut_2015 <- sf::st_crop(snodas_2015$`swe_2015-04-01`, ut_map)
+
+# change the name so the plot doesn't have the text file name.
+names(snodas_ut_2015) <- "Value"
+
+# Plotting SNODAS SWE map
+# plot(snodas_ut_2015, breaks = "equal")
+ggplot() +
+  stars::geom_stars(data = snodas_ut_2015) +
+  geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
+  ggtitle("2015 SNODAS SWE predictions") +
+  scale_fill_viridis_c(option = "A") +
+  theme(plot.title = element_text(hjust = 0.5, size = 20),
+        text = element_text(size = 16))
+
+```
+
+## After downloading SNODAS data get the SNOTEL station data information
+
+```{r snotel}
+# april 1st data for Snotel stations in Utah
+snotel_ut <- improved::april_1_snotel_data
+
+# 
+date_2015 <- as.Date(improved::format_dates(day = 1, month = 4, year = 2015))
+snotel_ut_2015 <- snotel_ut[snotel_ut$DATE == date_2015, ]
+```
+
+### Creating a stars object of predictions from a model
+
+This will create a grid of predictions using precipitation.  This also allows the user to input a model as to not use the preset. 
+
+```{r gam}
+gam_2015 <- improved::gam_to_raster(model_data = snotel_ut_2015,
+    raster_template = snodas_ut_2015,
+    path_to_prism = "/Users/loganschneider/Desktop/PRISM")
+
+# plot(gam_2015)
+
+ggplot() +
+  stars::geom_stars(data = gam_2015) +
+  geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
+  ggtitle("2015 GAM SWE predictions") +
+  scale_fill_viridis_c(option = "D") +
+  theme(plot.title = element_text(hjust = 0.5, size = 20),
+        text = element_text(size = 16))
+```
+
+## Calculate the station density
+
+```{r statd}
+# Create the density map
+density_2015 <- improved::points_to_density_stars(sp_points = snotel_ut_2015,
+                                        coords = c("LONGITUDE","LATITUDE"),
+                                        raster_template = snodas_ut_2015,
+                                        sigma = 15000,
+                                        max_weight = .5,
+                                        flat_crs =
+                          "+proj=utm + zone=12 + datum=WGS84")
+
+names(density_2015) <- "Weights"
+# plot(density_2015)
+ggplot() +
+  stars::geom_stars(data = density_2015) +
+  geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
+  ggtitle("Station Density 2015") +
+  scale_fill_viridis_c(option = "D") +
+  theme(plot.title = element_text(hjust = 0.5, size = 20),
+        text = element_text(size = 16))
+
+```
+
+## Ensemble approach
+
+```{r ensemble, eval=FALSE}
+ensemble_2015 <- ((density_2015) * gam_2015) + 
+  ((1 - density_2015) * snodas_ut_2015)
+
+# plot(ensemble_2015)
+names(ensemble_2015) <- "Predicted Value"
+
+ggplot() +
+  stars::geom_stars(data = ensemble_2015) +
+  geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
+  ggtitle("2015 Ensemble SWE predictions") +
+  scale_fill_viridis_c(option = "A") +
+  theme(plot.title = element_text(hjust = 0.5, size = 20),
+        text = element_text(size = 16))
+
+```
