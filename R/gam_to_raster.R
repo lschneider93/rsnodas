@@ -14,9 +14,12 @@
 #' The function unzips the selected data files and stores the specified
 #' maps into a list and combines them all into a RasterBrick.
 #'
-#' @importFrom utils download.file untar
-#' @importFrom R.utils gunzip
-#' @importFrom lubridate day month year
+#' @importFrom stats predict
+#' @importFrom methods hasArg
+#' @importFrom sf st_coordinates st_as_sf st_crs
+#' @importFrom stars read_stars st_warp st_as_stars
+#' @importFrom terra terrain rast vect extract
+#' @importFrom mgcv gam
 #'
 #' @details This function creates a permanent folder and downloads data
 #'   from the SNODAS website for the selected date(s), map type(s), and data map
@@ -25,11 +28,12 @@
 #'   maps into a list of star objects.
 #'
 #' @export
-gam_to_raster <- function(model_data = april_1_snotel[april_1_snotel$DATE ==
-                                                        dates[17], ],
-                          raster_template = snodas_april_maps[[17]],
+gam_to_raster <- function(model_data,# = april_1_snotel[april_1_snotel$DATE ==
+                          #                                                         dates[17], ],
+                          raster_template,# = snodas_april_maps[[17]],
                           model = NA,
-                          path_to_prism = "/Users/loganschneider/Desktop/PRISM") {
+                          path_to_prism) {# = "/Users/loganschneider/Desktop/PRISM") {
+
 
   if (methods::hasArg(model) == TRUE &
       any(class(model) %in% c("gam", "glm", "lm", "rf"))) {
@@ -112,19 +116,19 @@ gam_to_raster <- function(model_data = april_1_snotel[april_1_snotel$DATE ==
                        method = "REML")
 
     # Make the predictions
-    model_predictions <- predict(model, newdata = df)
+    model_predictions <- stats::predict(model, newdata = df)
     model_predictions <- ifelse(model_predictions < 0, 0,
                                 model_predictions)
 
   } else if (any(class(model) %in% c("gam", "glm", "lm", "rf"))) {
 
     # skip making the model and make predictions
-    model_predictions <- predict(model, newdata = df)
+    model_predictions <- stats::predict(model, newdata = df)
     model_predictions <- ifelse(model_predictions < 0, 0,
                                 model_predictions)
   }
 
-  # add the precictions to the data frame of longitude and latitude
+  # add the predictions to the data frame of longitude and latitude
   df$MODEL_PRED <- model_predictions
   utah <- df[c("LONGITUDE", "LATITUDE", "MODEL_PRED")]
 
@@ -132,6 +136,7 @@ gam_to_raster <- function(model_data = april_1_snotel[april_1_snotel$DATE ==
   utah_pred_star <- stars::st_as_stars(utah, coords = c("LONGITUDE", "LATITUDE"),
                                        crs = sf::st_crs(raster_template))
 
+  # put the prediction raster into the template of the raster provided
   utah_pred_star <- stars::st_warp(utah_pred_star, raster_template)
 
   return(utah_pred_star)

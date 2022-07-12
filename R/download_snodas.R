@@ -1,4 +1,4 @@
-#' Download Daily SNODAS Data maps
+#' Download SNODAS Data maps
 #'
 #' @param dates date with YYYY-MM-dd written as a six digit character string
 #' @param masked if TRUE, the maps will be from the masked
@@ -25,7 +25,7 @@
 #'   gtif object.
 #'
 #' @return a list of star objects with elements corresponding to the
-#'   input vaiable "data_saved".
+#'   input argument data_saved.
 #'
 #' @details This function creates a permanent folder and downloads data
 #'   from the SNODAS website for the selected date(s), map type(s), and data map
@@ -35,19 +35,17 @@
 #'
 #' @importFrom utils download.file untar
 #' @importFrom R.utils gunzip
-#' @importFrom lubridate day month year
 #' @importFrom stars read_stars
-#'
-#' @export
-
+#' @importFrom stars write_stars
+#
 # Modified Code from the following GitHub packages:
 # Author: Brian J. Smith, Package: snowdl  https://github.com/bsmity13/snowdl
-# Author: Richard E. Marinos, Package: snodasr
-#   https://github.com/marinosr/SNODASR
-
+# Author: Richard E. Marinos, Package: snodasr https://github.com/marinosr/SNODASR
+#
 # Adapted for sf and stars functionality by Logan Schneider (May 2022)
-
-download_snodas_data <- function(dates = c("2010-01-01", "2017-4-1"),
+#
+#' @export
+download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
                                  masked = TRUE,
                                  overwrite = TRUE,
                                  remove_zip = FALSE,
@@ -101,15 +99,15 @@ download_snodas_data <- function(dates = c("2010-01-01", "2017-4-1"),
 
   # get the url from the day, month, and year
   if(masked == TRUE) {
-    url <- paste("ftp://sidads.colorado.edu/DATASETS/NOAA/G02158/masked/",
+    url <- paste0("ftp://sidads.colorado.edu/DATASETS/NOAA/G02158/masked/",
                  year, "/", month, "_", mon,
-                 "/SNODAS_", year, month, d, ".tar", sep = '')
+                 "/SNODAS_", year, month, d, ".tar")
 
   } else if (masked == FALSE) {
-    url <- paste("ftp://sidads.colorado.edu/DATASETS/NOAA/G02158/unmasked/",
+    url <- paste0("ftp://sidads.colorado.edu/DATASETS/NOAA/G02158/unmasked/",
                  year, "/", month, "_", mon,
                  "/SNODAS_unmasked", "_",
-                 year, month, d, ".tar", sep = '')
+                 year, month, d, ".tar")
   }
 
   # Download all of the SNODAS data files and put them in the data folder

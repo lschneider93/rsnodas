@@ -19,7 +19,7 @@
 ################################################################################
 
 # load the GHCND Station DATA, Put this in the Data
-load("C:/Users/Logan/Desktop/improved/data/ghcnd_stations.rda")
+load("data-raw/ghcnd_stations.rda")
 
 # Vector of Utah Stations
 utah_STATIONS <- ghcnd_stations$ID[ghcnd_stations$STATE %in% "UT"]

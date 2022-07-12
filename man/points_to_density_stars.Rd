@@ -5,9 +5,9 @@
 \title{Generate a raster from the density of spatial points}
 \usage{
 points_to_density_stars(
-  sp_points = april_df_ghcnd[[17]],
+  sp_points,
   coords = c("LONGITUDE", "LATITUDE"),
-  raster_template = snodas_maps_utah[[17]],
+  raster_template,
   sigma = 15000,
   max_weight = 0.5,
   flat_crs = "+proj=utm + zone=12 + datum=WGS84"
@@ -21,7 +21,8 @@ longitude, latitude, and other variables}
 
 \item{raster_template}{a template that the density raster should follow}
 
-\item{sigma}{changes the distance in which to consider}
+\item{sigma}{changes the kernel density or the how far away from an
+observation.}
 
 \item{max_weight}{a numeric value between between (0, 1].}
 
@@ -36,7 +37,7 @@ Generate a raster from the density of spatial points
 }
 \details{
 This function creates a permanent folder and downloads data
-from the SNODAS website for the inputed date(s), map type(s), and data map
+from the SNODAS website for the input date(s), map type(s), and data map
 that the user provides. This data is stored in the permanent folder.
 The function unzips the selected data files and stores the specified
 maps into a list and combines them all into a RasterBrick.

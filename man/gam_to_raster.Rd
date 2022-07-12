@@ -4,12 +4,7 @@
 \alias{gam_to_raster}
 \title{Generate a raster from a generalized additive model}
 \usage{
-gam_to_raster(
-  model_data = april_1_snotel[april_1_snotel$DATE == dates[17], ],
-  raster_template = snodas_april_maps[[17]],
-  model = NA,
-  path_to_prism = "/Users/loganschneider/Desktop/PRISM"
-)
+gam_to_raster(model_data, raster_template, model = NA, path_to_prism)
 }
 \arguments{
 \item{model_data}{the data in which the model is created}
