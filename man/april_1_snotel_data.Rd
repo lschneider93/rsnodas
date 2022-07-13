@@ -5,7 +5,7 @@
 \alias{april_1_snotel_data}
 \title{april_1_snotel_data}
 \format{
-An object of class \code{data.frame} with 3638 rows and 20 columns.
+An object of class \code{data.frame} with 3768 rows and 20 columns.
 }
 \usage{
 april_1_snotel_data
