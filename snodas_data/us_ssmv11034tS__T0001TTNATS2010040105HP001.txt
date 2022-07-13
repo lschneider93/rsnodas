@@ -1,0 +1,107 @@
+Format version: NOHRSC GIS/RS raster file v1.1
+Data source: RUC2, NESDIS, etc.
+Created by module: sm_products
+Created by module comment: number BARD codes: 0000000021 BARD codes: 363670655 314270488 363670475 363670212 363661537 363669970 363670401 360100580 179099442 360100917 363661542 363665491 12222 226921937 194762463 194750795 120043862 319955379 194761059 244392413 324899530
+Created year: 2010
+Created month: 4 
+Created day: 1 
+Created hour: 5 
+Created minute: 58
+Created second: 17
+Last modified by module: sm_products
+Last modified by module comment: Not applicable
+Last modified year: 2010
+Last modified month: 4 
+Last modified day: 1 
+Last modified hour: 5 
+Last modified minute: 58
+Last modified second: 17
+Satellite data: no
+Satellite name: Not applicable
+Satellite channel: 0
+Satellite data calibrated: no
+Description: Modeled snow water equivalent, total of snow layers
+Thematic: no
+Theme file: Not applicable
+Data units: Meters / 1000.000000
+Product code: 402078465 
+Attribute table: Not applicable
+Data file pathname: us_ssmv11034tS__T0001TTNATS2010040105HP001.dat
+Data type: integer
+Data bytes per pixel: 2
+Data intercept: 0.00000000000000
+Data slope: 1.00000000000000
+Minimum data value: 0.00000000000000
+Maximum data value: 12173.0000000000
+No data value: -9999.00000000000
+Number of columns: 6935      
+Number of rows: 3351      
+Geographically corrected: yes
+Projected: no
+Projection file: Not applicable
+Horizontal datum: WGS84
+Horizontal precision: 0.00833333333333300
+Elevation above datum: no
+Vertical datum: Not applicable
+Vertical precision: 0.00000000000000
+Benchmark column: 0         
+Benchmark row: 0         
+Benchmark x-axis coordinate: -124.729583333332
+Benchmark y-axis coordinate: 52.8704166666656
+X-axis resolution: 0.00833333333333300
+Y-axis resolution: 0.00833333333333300
+X-axis offset: 0.00374999999670214
+Y-axis offset: 0.00375000000107451
+Minimum x-axis coordinate: -124.733749999999
+Maximum x-axis coordinate: -66.9420833333342
+Minimum y-axis coordinate: 24.9495833333334
+Maximum y-axis coordinate: 52.8745833333322
+Start year: 2010
+Start month: 4 
+Start day: 1 
+Start hour: 6 
+Start minute: 0 
+Start second: 0 
+Stop year: 2010
+Stop month: 4 
+Stop day: 1 
+Stop hour: 6 
+Stop minute: 0 
+Stop second: 0 
+Compressed: no
+Compression file: Not applicable
+Number of color tables: 0 
+Color table 01 descriptor: Not applicable
+Color table 02 descriptor: Not applicable
+Color table 03 descriptor: Not applicable
+Color table 04 descriptor: Not applicable
+Color table 05 descriptor: Not applicable
+Color table 06 descriptor: Not applicable
+Color table 07 descriptor: Not applicable
+Color table 08 descriptor: Not applicable
+Color table 09 descriptor: Not applicable
+Color table 10 descriptor: Not applicable
+Color table 11 descriptor: Not applicable
+Color table 12 descriptor: Not applicable
+Color table 13 descriptor: Not applicable
+Color table 14 descriptor: Not applicable
+Color table 15 descriptor: Not applicable
+Color table 16 descriptor: Not applicable
+Color table 01 file: Not applicable
+Color table 02 file: Not applicable
+Color table 03 file: Not applicable
+Color table 04 file: Not applicable
+Color table 05 file: Not applicable
+Color table 06 file: Not applicable
+Color table 07 file: Not applicable
+Color table 08 file: Not applicable
+Color table 09 file: Not applicable
+Color table 10 file: Not applicable
+Color table 11 file: Not applicable
+Color table 12 file: Not applicable
+Color table 13 file: Not applicable
+Color table 14 file: Not applicable
+Color table 15 file: Not applicable
+Color table 16 file: Not applicable
+Histogram: no
+Histogram file: Not applicable
