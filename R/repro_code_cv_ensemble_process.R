@@ -76,7 +76,7 @@ for (i in 1:length(snodas_april_maps)) {
 #############           Creating station density maps              #############
 ################################################################################
 density_map <- vector("list", length(snodas_april_maps))
-density_map_100 <- vector("list", length(snodas_april_maps))
+# density_map_50 <- vector("list", length(snodas_april_maps))
 
 # Create the density map
 for (i in 1:length(snodas_april_maps)) {
@@ -84,17 +84,17 @@ for (i in 1:length(snodas_april_maps)) {
                                               coords = c("LONGITUDE","LATITUDE"),
                                               raster_template = snodas_april_maps$`swe_2020-04-01`,
                                               sigma = 15000,
-                                              max_weight = .5,
+                                              max_weight = 1,
                                               flat_crs =
                                                 "+proj=utm + zone=12 + datum=WGS84")
 
-  density_map_100[[i]] <- points_to_density_stars(sp_points = april_1_snotel[april_1_snotel$DATE == dates[i], ],
-                                                  coords = c("LONGITUDE","LATITUDE"),
-                                                  raster_template = snodas_april_maps$`swe_2020-04-01`,
-                                                  sigma = 15000,
-                                                  max_weight = 1,
-                                                  flat_crs =
-                                                    "+proj=utm + zone=12 + datum=WGS84")
+  # density_map_50[[i]] <- points_to_density_stars(sp_points = april_1_snotel[april_1_snotel$DATE == dates[i], ],
+  #                                                 coords = c("LONGITUDE","LATITUDE"),
+  #                                                 raster_template = snodas_april_maps$`swe_2020-04-01`,
+  #                                                 sigma = 15000,
+  #                                                 max_weight = .5,
+  #                                                 flat_crs =
+  #                                                   "+proj=utm + zone=12 + datum=WGS84")
 }
 
 
@@ -103,14 +103,14 @@ for (i in 1:length(snodas_april_maps)) {
 ################################################################################
 i = 1
 comb_maps <- vector("list", 19)
-comb_maps_100 <- vector("list", 19)
+comb_maps_50 <- vector("list", 19)
 
 for (i in 1:19) {
   comb_maps[[i]] <- ((density_map[[i]]) * gam_raster[[i]]) +
     ((1 - density_map[[i]]) * snodas_april_maps[[i]])
 
-  comb_maps_100[[i]] <- ((density_map_100[[i]]) * gam_raster[[i]]) +
-    ((1 - density_map_100[[i]]) * snodas_april_maps[[i]])
+  # comb_maps_100[[i]] <- ((density_map_100[[i]]) * gam_raster[[i]]) +
+  #   ((1 - density_map_50[[i]]) * snodas_april_maps[[i]])
 }
 
 

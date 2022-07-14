@@ -121,7 +121,7 @@ april_1_snotel[tf_vector, "CV_GAM_SNODAS_100"] <- 99999
 # set.seed(123)
 
 # Cross-Validation for all the years
-for (i in 1:(length(snodas_april_maps) - 1)) {
+for (i in 1:(length(snodas_april_maps))) {
   # Create a logical vector of all that are in a specific year
   tf_vector <- april_1_snotel$DATE == dates[i]
 
@@ -228,54 +228,35 @@ for (i in 1:(length(snodas_april_maps) - 1)) {
                                           "+proj=utm + zone=12 + datum=WGS84")
 
     # combine all of the maps
-    # SNODAS_GAM_UA_50_50
-    # comb_map <- ((pd_star) * test_gam) +
-    #   ((1 - pd_star) * (comb_ua_snodas_maps[[i]]))
-
     # SNODAS_GAM_50_50
     comb_map2 <- ((pd_star) * test_gam) +
       ((1 - pd_star) * (snodas_april_maps[[i]]))
 
     # SNODAS_GAM_UA_60_40
-    # comb_map3 <- ((pd_star2) * test_gam) +
-    #   ((1 - pd_star2) * (comb_ua_snodas_maps[[i]]))
-
-    # SNODAS_GAM_UA_60_40
     comb_map4 <- ((pd_star2) * test_gam) +
       ((1 - pd_star2) * (snodas_april_maps[[i]]))
-
-    #SNODAS_GAM_UA_70_30
-    # comb_map5 <- ((pd_star3) * test_gam) +
-    #   ((1 - pd_star3) * (comb_ua_snodas_maps[[i]]))
 
     # SNODAS_GAM_70_30
     comb_map6 <- ((pd_star3) * test_gam) +
       ((1 - pd_star3) * (snodas_april_maps[[i]]))
 
-    # SNODAS_GAM_UA_80_20
-    # comb_map7 <- ((pd_star4) * test_gam) +
-    #   ((1 - pd_star4) * (comb_ua_snodas_maps[[i]]))
 
     # SNODAS_GAM_80_20
     comb_map8 <- ((pd_star4) * test_gam) +
       ((1 - pd_star4) * (snodas_april_maps[[i]]))
 
-    # SNODAS_GAM_UA_90_10
-    # comb_map9 <- ((pd_star5) * test_gam) +
-    #   ((1 - pd_star5) * (comb_ua_snodas_maps[[i]]))
-
     # SNODAS_GAM_90_10
     comb_map10 <- ((pd_star5) * test_gam) +
       ((1 - pd_star5) * (snodas_april_maps[[i]]))
 
-    # SNODAS_GAM_UA_100_0
-    # comb_map11 <- ((pd_star6) * test_gam) +
-    #   ((1 - pd_star6) * (comb_ua_snodas_maps[[i]]))
 
     # SNODAS_GAM_100_0
     comb_map12 <- ((pd_star6) * test_gam) +
       ((1 - pd_star6) * (snodas_april_maps[[i]]))
 
+    # SNODAS_GAM_UA_100_0
+    # comb_map11 <- ((pd_star6) * test_gam) +
+    #   ((1 - pd_star6) * (comb_ua_snodas_maps[[i]]))
 
     # Make predictions and compute the R2, RMSE and MAE
     # # predictions <- model %>% predict(test.data)
@@ -377,16 +358,19 @@ table(april_1_snotel[, "CV_GAM_SNODAS_80_20"] == 99999)
 table(april_1_snotel[, "CV_GAM_SNODAS_90_10"] == 99999)
 table(april_1_snotel[, "CV_GAM_SNODAS_100"] == 99999)
 
-table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_UA_100"])
-table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_90_10"])
-table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_UA_90_10"])
-table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_80_20"])
-table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_UA_80_20"])
-table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_70_30"])
-table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_UA_70_30"])
-table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_60_40"])
-table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_UA_60_40"])
 
+table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_90_10"])
+table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_80_20"])
+table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_70_30"])
+table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_60_40"])
+table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_50_50"])
+
+
+# table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_UA_100"])
+# table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_UA_90_10"])
+# table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_UA_80_20"])
+# table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_UA_70_30"])
+# table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_UA_60_40"])
 
 
 # table(april_1_snotel[, "CV_GAM_SNODAS_UA_50_50"] == 99999)
@@ -413,43 +397,42 @@ april_1_snotel[april_1_snotel$GAM_PREDS != 99999, ]
 ################################################################################
 
 april_1_snotel$SNODAS_VALUE <- 99999
-april_1_snotel$UA_VALUE <- 99999
-april_1_snotel$UA_VALUE <- ifelse(april_1_snotel$UA_VALUE == 99999, NA, april_1_snotel$UA_VALUE)
-april_1_snotel[, "FULL_GAM_VALUE"] <- 99999
-april_1_snotel[, "FULL_COMB_VALUE"] <- 99999
-april_1_snotel[, "FULL_GAM_SNODAS_VALUE"] <- 99999
+# april_1_snotel$UA_VALUE <- 99999
+# april_1_snotel$UA_VALUE <- ifelse(april_1_snotel$UA_VALUE == 99999, NA, april_1_snotel$UA_VALUE)
+# april_1_snotel[, "FULL_GAM_VALUE"] <- 99999
+# april_1_snotel[, "FULL_COMB_VALUE"] <- 99999
+# april_1_snotel[, "FULL_GAM_SNODAS_VALUE"] <- 99999
 
 # set.seed(123)
-for (i in 1:(length(snodas_april_maps) - 1)) {
-  # Create a logical vector of all that are in a specific year
+for (i in 1:(length(snodas_april_maps))) {
+  # # Create a logical vector of all that are in a specific year
   tf_vector <- april_1_snotel$DATE == dates[i]
 
-  # Get the data for just a specific year and calculate the length
+  # # Get the data for just a specific year and calculate the length
   data <- april_1_snotel[tf_vector, ]
 
   # Create an SF object with extract data values
   data <- sf::st_as_sf(data, coords = c("LONGITUDE", "LATITUDE"),
                crs = sf::st_crs(snodas_april_maps[[i]]))
 
-  # Create a combined map with just SNODAS
-  sno_gam <- ((density_map[[i]]) * gam_raster[[i]]) +
-    ((1 - density_map[[i]]) * (snodas_april_maps[[i]]))
+  # # Create a combined map with just SNODAS
+  # sno_gam <- ((density_map[[i]]) * gam_raster[[i]]) +
+    # ((1 - density_map[[i]]) * (snodas_april_maps[[i]]))
 
   # Adding SNODAS
   names(snodas_april_maps[[i]]) <- "SNODAS"
   april_1_snotel[tf_vector, "SNODAS_VALUE"] <- stars::st_extract(snodas_april_maps[[i]], data)$SNODAS
 
-  april_1_snotel[tf_vector, "FULL_GAM_VALUE"] <- stars::st_extract(gam_raster[[i]], data)$MODEL_PRED
-  april_1_snotel[tf_vector, "FULL_COMB_VALUE"] <- stars::st_extract(comb_maps[[i]], data)$v
-  april_1_snotel[tf_vector, "FULL_GAM_SNODAS_VALUE"] <- stars::st_extract(sno_gam, data)$v
-
-  april_1_snotel[tf_vector, "UA_VALUE"] <- stars::st_extract(ua_april_maps[, , , paste0("SWE_04_01_", years[i])], data)$ua_ut_april1.tif
+  # april_1_snotel[tf_vector, "FULL_GAM_VALUE"] <- stars::st_extract(gam_raster[[i]], data)$MODEL_PRED
+  # april_1_snotel[tf_vector, "FULL_COMB_VALUE"] <- stars::st_extract(comb_maps[[i]], data)$v
+  # april_1_snotel[tf_vector, "FULL_GAM_SNODAS_VALUE"] <- stars::st_extract(sno_gam, data)$v
+  # april_1_snotel[tf_vector, "UA_VALUE"] <- stars::st_extract(ua_april_maps[, , , paste0("SWE_04_01_", years[i])], data)$ua_ut_april1.tif
 
 }
 
 # write.csv(april_1_snotel, file = "station_info_full.csv")
 april_1_snotel_2003 <- april_1_snotel[(april_1_snotel$DATE > "2003-04-01") &
-                                        (april_1_snotel$DATE < "2022-04-01"), ]
+                                        (april_1_snotel$DATE < "2022-05-01"), ]
 
 # 2023 observations in total
 table(april_1_snotel_2003$CV_GAM_MODEL != 99999) # GOOD! 2023
