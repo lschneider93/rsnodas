@@ -6,7 +6,7 @@ output:
     bookdown::pdf_document2:
     includes:
     number_sections: TRUE
-fontsize: 11pt
+fontsize: 10pt
 header-includes:
   - \usepackage{amsmath}
   - \usepackage{hyperref}
@@ -55,34 +55,23 @@ install_github("lschneider93/rsnodas")
 
 <!-- \url{https://www.usu.edu/utahsnowload/}. -->
 
-The outline for understanding rsnodas capabilities is as follows:
-\begin{enumerate}
-  \item Download SNODAS
-  \item Download SNOTEL and PRISM
-  \item GAM to Raster
-  \begin{enumerate}
-    \item Station Density
-  \end{enumerate}
-  \item Ensemble
-\end{enumerate}
+The outline will be Downloading SNODAS, SNOTEL, and PRISM.  After downloading all of those sources of data, the process of creating a raster of predictions and calculating station density will be shown.  The blending of SNODAS and the Generalized Additive model can then be explored.
+<!-- \begin{enumerate} -->
+<!--   \item Download SNODAS -->
+<!--   \item Download SNOTEL and PRISM -->
+<!--   \item GAM to Raster -->
+<!--   \begin{enumerate} -->
+<!--     \item Station Density -->
+<!--   \end{enumerate} -->
+<!--   \item Ensemble -->
+<!-- \end{enumerate} -->
 
-# Downloading SNODAS
-SNODAS provides maps of the following data:
+# Downloading Download SNODAS, SNOTEL and PRISM
 
-\begin{itemize}
-\item Snow water equivalent (SWE) 
-\item Snow Depth (SnD)
-\item Snow melt runoff (SM)
-\item Sublimation from the Snow Pack (SSP)
-\item Sublimation of Blowing Snow (SBS)
-\item Solid and liquid precipitation (PPT)
-\item Snow pack average temperature (SPTave)
-\end{itemize}
-
-The function `format_date` will create a character vector with each element being a different day in the format YYYY-MM-DD that most functions require. This function can be used inside other functions to allow for mass downloading specific dates of a year. The function `download_snodas_data` is one example in which this function will be applicable
+## SNODAS
+SNODAS provides maps of Snow water equivalent (SWE), Snow Depth (SnD), Snow melt runoff (SM), Sublimation from the Snow Pack (SSP), Sublimation of Blowing Snow (SBS), Solid and liquid precipitation (PPT), and Snow pack average temperature (SPTave). `download_snodas` allows us to choose the variables we want to download. Note that the dates need to be in 'YYYY-MM-DD' or 'YYYY-M-D' format.  The function `format_date` can be used to create character vectors in the needed format to help quickly for mass downloading.
 
 <!-- has the arguments of `dates`, `masked`, `remove_zip`, `data_saved`, `out_dir`, and `GTiff`. The user can specify which or all of the 8 options of data to download, where to store, and if they want to save the map as a tif.  -->
-
 ```{r fdates, echo = FALSE, eval = FALSE}
 
 # This will download all SNODAS for April 1st in 2011-2014
@@ -90,46 +79,50 @@ download_snodas(dates = format_dates(day = 1, month = 4, year = 2011:2014),
                 masked = TRUE, overwrite = TRUE, remove_zip = FALSE,
                                  data_saved = c('swe', 'SP', "SD", "SPT",
                                                 'bss', 'melt', 'SPS', 'NSP'),
-                                 out_dir = "C:/Users/Logan/Desktop/GitHub/snodas_data",
+                                 out_dir = "/Users/loganschneider/Desktop/GitHub/rsnodas/vignette/snodas_data",
                                  GTiff = TRUE) 
 
 # This will download SWE and Snow depth for the 2nd-3rd of October, November and December in 2007
 download_snodas(dates = format_dates(day = 2:3, month = 10:12, year = 2007),
                 masked = TRUE, overwrite = TRUE, remove_zip = FALSE,
                                  data_saved = c('swe', "SD"),
-                                 out_dir = "C:/Users/Logan/Desktop/GitHub/snodas_data",
+                                 out_dir = "/Users/loganschneider/Desktop/GitHub/rsnodas/vignette/snodas_data",
                                  GTiff = TRUE) 
 ```
 
-
 <!-- \newpage -->
+
+<!-- # get the pipe function from magrittr -->
+<!-- "%>%" <- magrittr::"%>%" -->
+
+<!-- # Get an shape of utah from the maps package -->
+<!-- ut_map <- maps::map("state", plot = FALSE, fill = TRUE) %>% -->
+<!--   sf::st_as_sf() %>% -->
+<!--   dplyr::filter(ID == "utah") %>% -->
+<!--   sf::st_transform(crs = sf::st_crs(snodas_april1$'swe_2014-04-01')) -->
+
+<!-- # Crop the maps to just the state of Utah -->
+<!-- snodas_ut_2014 <- sf::st_crop(snodas_april1$'swe_2014-04-01', ut_map) -->
+
+<!-- # Change the name so text file isn't seen when plotting -->
+<!-- names(snodas_ut_2014) <- "Value" -->
 
 ```{r snodas, echo = TRUE, eval = FALSE}
 # Download Snodas SWE data for April 1st in 2014 and 2015
 snodas_april1 <- download_snodas(dates = format_dates(day = 1,
                                                            month = 4,
                                                            year = 2014:2015),
-                                      masked = TRUE,
-                                      remove_zip = TRUE,
-                                      data_saved = c("swe"),
-                                      out_dir = "C:/Users/Logan/Desktop/GitHub/snodas_data",
-                                      GTiff = FALSE)
+                      masked = TRUE,
+                      remove_zip = TRUE,
+                      data_saved = c("swe"),
+                      out_dir = paste0("/Users/loganschneider/Desktop/GitHub",
+                                       "/rsnodas/vignette/snodas_data"),
+                      GTiff = FALSE)
+```
 
-# get the pipe function from magrittr
-"%>%" <- magrittr::"%>%"
+After downloading SNODAS, you can crop it to the area or state of interest.  These steps aren't shown but this map was cropped to the state of Utah.
 
-# Get an shape of utah from the maps package
-ut_map <- maps::map("state", plot = FALSE, fill = TRUE) %>%
-  sf::st_as_sf() %>%
-  dplyr::filter(ID == "utah") %>%
-  sf::st_transform(crs = sf::st_crs(snodas_april1$'swe_2014-04-01'))
-
-# Crop the maps to just the state of Utah
-snodas_ut_2014 <- sf::st_crop(snodas_april1$'swe_2014-04-01', ut_map)
-
-# Change the name so text file isn't seen when plotting
-names(snodas_ut_2014) <- "Value"
-
+```{r snodas2, echo = TRUE, eval = FALSE}
 # Plot SNODAS April 1st 2015 SWE map of Utah with blue outline
 g <- ggplot() + 
   stars::geom_stars(data = snodas_ut_2014) +
@@ -138,51 +131,32 @@ g <- ggplot() +
   scale_fill_viridis_c(option = "A") + 
   theme(plot.title = element_text(hjust = 0.5, size = 24),
         text = element_text(size = 22))
-g
 ```
 
-<!-- \begin{figure}[ht] -->
-<!-- \centerline{\includegraphics[width=.50\textwidth]{figures/Thesis_SNODAS_map_for_2014.png}} -->
-<!-- \caption{\label{SNODAS SWE predictions for April 1st, 2015.} -->
-<!-- \small -->
-<!-- This is a gridded estimates of SWE throughout the state of Utah with a blue boarder. -->
-<!-- } -->
-<!-- \end{figure} -->
+\begin{figure}[ht]
+\centerline{\includegraphics[width=.45\textwidth]{figures/Thesis_SNODAS_map_2014.png}}
+\end{figure}
 
-
-
-# Download SNOTEL and PRISM
-
-## Downloading SNOTEL site data
-
+## Download SNOTEL 
 The `data-raw` folder contains an script titled `DATASET` that shows how to download the all SNOTEL data by using `download_all_ghcnd_stations`.  Note that there is more than 30 gigabytes of data and this will take time to download. The functions `download_all_ghcnd_stations` and `download_all_ghcnd_stations` are for the purpose of sifting through all the data to get the stations in a specific state.  These functions were used to create the dataset `april_1_snotel_data`. 
+
 ```{r snotel, eval = FALSE, echo = TRUE}
 # Code to download all stations in your working directory. A file path could 
 #   have been used instead of ".".
 download_all_ghcnd_stations(directory = ".")
 
-# april 1st data for SNOTEL stations in Utah
+# april 1st data for SNOTEL stations in Utah and subset to just April 1st, 2014.
 snotel_ut <- rsnodas::april_1_snotel_data
-
-# subset to just April 1st, 2015.
 snotel_ut_2014 <- snotel_ut[snotel_ut$DATE == "2014-04-01", ]
-
 ```
 
-## Downloading PRISM climate data
+## Download PRISM climate data
 
-The PRISM climate group has been provided maps since 1895 for the following climate elements:
-\begin{itemize}
-\item Precipitation (PPT)
-\item Minimum and maximum temperature (Tmin and Tmax)
-\item Minimum and maximum vapor pressure deficit (vpdmin and vpdmax)
-\item mean dew point (tdmean)
-\item Elevation (Elev)
-\item Total global shortwave solar radiation
-\end{itemize}
+The PRISM climate group has been provided climate maps since 1895 for the Precipitation (PPT), Minimum and maximum temperature (Tmin and Tmax), Minimum and maximum vapor pressure deficit (vpdmin and vpdmax), mean dew point (tdmean), Elevation (Elev), Total global shortwave solar radiation.
 
-Most of this data can be downloaded by utilizing the R package, \texttt{prism}, and more examples and information is available at \href{https://cran.r-project.org/web/packages/prism/vignettes/prism.html}{\textcolor{blue}{this link}. The function `download_prism` can be used to download and store PRISM climate data that can be utilized later for model prediction. These are examples of downloading daily, monthly, and yearly data from separate years and multiple types.
+Most of this data from PRISM can be downloaded by utilizing the R package, \texttt{prism}, and more examples and information is available at \href{https://cran.r-project.org/web/packages/prism/vignettes/prism.html}{\textcolor{blue}{this link}}. The function `download_prism` can be used to download and store PRISM climate data that can be utilized later for model prediction. These are examples of downloading daily, monthly, and yearly data from separate years and multiple types and the store them in the directory.
 
+Downloading PRISM can also be completed using rsnodas by using download_prism. This is just one function that can download daily, monthly, or yearly PRISM maps.
 ```{r prism, eval = FALSE}
 prism::prism_set_dl_dir(paste0(getwd(), "/data-raw/prism"))
 
@@ -195,55 +169,129 @@ prism::get_prism_normals("ppt", "4km", annual = TRUE, keepZip = FALSE)
 
 ```
 
-```{r prism2, eval = FALSE}
+```{r prism2, eval = FALSE, echo = TRUE}
 ## NOT RUN, This was ran earlier 
 # Example of downloading 4km monthly precipitation maps from Dec. 2013 - Feb. 2014 
 download_prism(sp_res = "4km", data = c("ppt"), t_res = "monthly",
                start_date = as.Date("2013-12-01"), end_date = as.Date("2014-02-15"),  
-               out_dir = "C:/Users/Logan/Desktop/GitHub/prism")
+               out_dir = "/Users/loganschneider/Desktop/GitHub/prism")
 
 # Example of downloading daily 4km mean and max temperature maps for Jan. 1-2, 2004
 download_prism(sp_res = "4km", data = c("tmax", "tmean"), t_res = "daily",
-               start_date = as.Date("2004-01-01"), end_date = as.Date("2004-01-02"),
-               out_dir = "C:/Users/Logan/Desktop/GitHub/prism")
+               start_date = as.Date("2013-11-15"), end_date = as.Date("2013-11-17"),
+               out_dir = "/Users/loganschneider/Desktop/GitHub/prism")
 
 # Example of downloading yearly Daily minimum and max vapor pressure deficit 
 #   at 4km resolution maps for Jan. 1, 2017-2019
 download_prism(sp_res = "4km", data = c("vpdmin", "vpdmax"), t_res = "yearly", 
                start_date = as.Date("2017-01-01"), end_date = as.Date("2019-01-15"),
-               out_dir = "C:/Users/Logan/Desktop/GitHub/prism")
+               out_dir = "/Users/loganschneider/Desktop/GitHub/prism")
 
 ```
+
+Note that all PRISM files need to be in the same location in order to use the function `gam_to_df` in the next section.
 
 # GAM to Raster
 
-After downloading the point data provided by SNOTEL sites and climate variables from PRISM.  The process of creating gridded raster estimates will be demonstrated.  This uses the function, `gam_to_raster`.
+After downloading the point data provided by SNOTEL sites and climate variables from PRISM.  The process of creating gridded raster estimates will be demonstrated.  This uses the function, `gam_to_raster` and accesses files in one directory. This allows users to explore different models and explore different climate variable combinations. 
 
-```{r gam, eval = FALSE}
+```{r gam, eval = FALSE, echo = TRUE}
+# creation of a data frame with all the PRISM variables of precipitation and elevation
+gam_2014 <- gam_to_df(model_data = snotel_ut_2014,
+                      raster_template = snodas_ut_2014,
+                      path_to_prism = "/Users/loganschneider/Desktop/GitHub/prism",
+                      model_x <- c("ppt_normal_annual", "elevation"),
+                      model_y <- c("VALUE"),
+                      coords = c("LONGITUDE", "LATITUDE"))
 
-gam_to_raster(model_data = snotel_ut_2014,
-              raster_template = snodas_ut_2014,
-              path_to_prism = "C:/Users/Logan/Desktop/GitHub/prism",
-              model_x <- c("ppt_normal_annual", "tmean_2013_11_15",
-                           "slope", "ELEVATION"),
-              model_y <- c("VALUE")
-              coords = c("LONGITUDE", "LATITUDE")
-```
+# This allows users to explore using different models with the same climate variables. 
+model <- mgcv::gam(data = snotel_ut_2014,
+                   VALUE ~ s(LONGITUDE, LATITUDE, bs = "sos", k = 25) +                          
+                  s(ppt_normal_annual) +
+                  s(elevation),
+                method = "REML")
 
-## Creating gridded estimates from point data
+# After creating a model, we can make predictions with the information available.
+gam_rast <- df_to_raster(model = model, df = gam_2014)
 
-One functionality is the creation of a grid of predictions using precipitation and elevation. This also allows the user to input a model, that only uses 30-year PRISM normal variables.
-
-```{r gam2, eval = FALSE}
-gam_2015 <- rsnodas::gam_to_raster(model_data = snotel_ut_2015,
-    raster_template = snodas_ut_2015,
-    path_to_prism = "/Users/loganschneider/Desktop/PRISM")
-
-ggplot() +
-  stars::geom_stars(data = gam_2015) +
+g <- ggplot() + 
+  stars::geom_stars(data = gam_rast) +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
-  ggtitle("2015 GAM SWE predictions") +
-  scale_fill_viridis_c(option = "D") +
-  theme(plot.title = element_text(hjust = 0.5, size = 20),
-        text = element_text(size = 16))
+  ggtitle("2014 GAM SWE predictions") + 
+  scale_fill_viridis_c(option = "A") + 
+  theme(plot.title = element_text(hjust = 0.5, size = 24),
+        text = element_text(size = 22))
+
 ```
+
+\begin{figure}[ht]
+\centerline{\includegraphics[width=.45\textwidth]{figures/GAM_SWE_map_2014.png}}
+\end{figure}
+
+## Station Density
+
+Before we can start blending these maps together, there needs to be some kind of weight associated with both maps.  This is going to be accomplished by looking at observation or station density.  The `sigma` argument will extend the distance and is in meters while the gridded product is in kilometers.  Changing the `max_weight` argument gives more weight to the Generalized Additive model or the model from the in-situ measurements.  
+
+```{r density, eval = FALSE, echo = TRUE}
+dens_2014 <- points_to_density_stars(sp_points = snotel_ut_2014,
+                                     coords = c("LONGITUDE", "LATITUDE"),
+                                     raster_template = snodas_ut_2014,
+                                     sigma = 15000,
+                                     max_weight = .80,
+                                     flat_crs = "+proj=utm + zone=12 + datum=WGS84")
+
+ggplot() + 
+  stars::geom_stars(data = dens_2014) +
+  geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
+  ggtitle("2014_Station_Density") + 
+  scale_fill_viridis_c(option = "B") + 
+  theme(plot.title = element_text(hjust = 0.5, size = 24),
+        text = element_text(size = 22))
+
+```
+
+\begin{figure}[ht]
+\centerline{\includegraphics[width=.45\textwidth]{figures/Thesis_Station_Density_2014.png}}
+\end{figure}
+
+The weighting scheme can change in the future.
+
+## Ensemble SNODAS and GAM predictions
+
+Lastly, you can use all the previous maps to create a final prediction or estimate of SWE. This process can be applied to multiple types of spatial problems. 
+
+```{r ensemble, eval = FALSE, echo = TRUE}
+comb_map <- ((dens_2014) * gam_rast) +
+    ((1 - dens_2014) * snodas_ut_2014)
+
+g <- ggplot() + 
+  stars::geom_stars(data = comb_map) +
+  geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
+  ggtitle("2014 Ensemble Map") + 
+  scale_fill_viridis_c(option = "B") + 
+  theme(plot.title = element_text(hjust = 0.5, size = 24),
+        text = element_text(size = 22))
+
+```
+
+\begin{figure}[ht]
+\centerline{\includegraphics[width=.45\textwidth]{figures/Thesis_Ensemble_2014.png}}
+\end{figure}
+
+<!-- \begin{figure} -->
+<!-- \centering -->
+<!-- \begin{subfigure}{.5\textwidth} -->
+<!--   \centering -->
+<!--   \includegraphics[width=.4\linewidth]{image1} -->
+<!--   \caption{A subfigure} -->
+<!--   \label{fig:sub1} -->
+<!-- \end{subfigure}% -->
+<!-- \begin{subfigure}{.5\textwidth} -->
+<!--   \centering -->
+<!--   \includegraphics[width=.4\linewidth]{image1} -->
+<!--   \caption{A subfigure} -->
+<!--   \label{fig:sub2} -->
+<!-- \end{subfigure} -->
+<!-- \caption{A figure with two subfigures} -->
+<!-- \label{fig:test} -->
+<!-- \end{figure} -->
