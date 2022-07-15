@@ -35,6 +35,14 @@ points_to_density_stars <- function(sp_points,# = april_df_ghcnd[[17]],
                                     flat_crs =
                                       "+proj=utm + zone=12 + datum=WGS84") {
 
+  # sp_points = april_1_snotel[april_1_snotel$DATE == "2004-04-01", ]
+  # coords = c("LONGITUDE", "LATITUDE")
+  # raster_template = snodas_april_maps[[1]]
+  # sigma = 15000
+  # max_weight = 1
+  # flat_crs =
+  #   "+proj=utm + zone=12 + datum=WGS84"
+
   # Get the Lon and Lat
   LON <- coords[1]
   LAT <- coords[2]
@@ -66,13 +74,27 @@ points_to_density_stars <- function(sp_points,# = april_df_ghcnd[[17]],
   ### Warp flat density so that it follows the raster_template
   stars_density <- stars::st_warp(stars_density, raster_template)
 
-  # names(stars_density) <- "v"
+  values <- "values"
+  names(stars_density) <- values
 
   # WEBSITE: https://tmieno2.github.io/R-as-GIS-for-Economists/dplyr-op.html
   # How to remove NA's and negative values and replace them with 0's.
-  stars_density <- dplyr::mutate(stars_density, v = ifelse(is.na(v) == TRUE,
-                                                           0, v))
-  stars_density <- dplyr::mutate(stars_density, v = ifelse(is.na(v) < 0 ,
-                                                           0, v))
+  stars_density <- dplyr::mutate(stars_density,
+                                 values = ifelse(is.na(values) == TRUE,
+                                                 0, values))
+  stars_density <- dplyr::mutate(stars_density,
+                                 values = ifelse(values < 0 ,
+                                                 0, values))
+  stars_density <- dplyr::mutate(stars_density,
+                                 values = ifelse(values > 1 ,
+                                                 1, values))
+  x <- sf::st_as_sf(stars_density)$values
+
+  x2 <- data.frame(x, breaks = cut(x, breaks = 10, include.lowest = TRUE))
+  table(x2$breaks)
+  sf::st_as_sf(stars_density)$values
+  t <- terra::rast(stars_density)
+
+  stars_density[1, ,  ]
   return(stars_density)
 }

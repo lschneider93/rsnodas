@@ -4,17 +4,33 @@
 \alias{gam_to_raster}
 \title{Generate a raster from a generalized additive model}
 \usage{
-gam_to_raster(model_data, raster_template, model = NA, path_to_prism)
+gam_to_raster(
+  model_data,
+  raster_template,
+  model_x,
+  model_y,
+  coords = c("LONGITUDE", "LATITUDE"),
+  path_to_prism
+)
 }
 \arguments{
-\item{model_data}{the data in which the model is created}
+\item{model_data}{the data in which the model is create. The variables of
+'slope', 'aspect', and 'elevation' need to be lowercase.}
 
 \item{raster_template}{a data frame with the columns of the model that will
 be used to create the model.}
 
-\item{model}{to apply to the data and predict.}
+\item{model_x}{a character vector where each entry symbolizes a column
+in the model_data data frame.  These will be the variables used to try
+to explain the Independent variable.}
 
-\item{path_to_prism}{a character vector that has the path to the PRISM files}
+\item{model_y}{a character vector of the Independent variable.}
+
+\item{coords}{the LON/LAT column names of the data.  This will be used to
+in the model no matter what.}
+
+\item{path_to_prism}{a character vector that has the file path
+to the PRISM files.}
 }
 \value{
 a stars object that contains the predictions of the model
@@ -23,11 +39,8 @@ a stars object that contains the predictions of the model
 Generate a raster from a generalized additive model
 }
 \details{
-This function creates a permanent folder and downloads data
-from the SNODAS website for the inputed date(s), map type(s), and data map
-that the user provides. This data is stored in the permanent folder.
-The function unzips the selected data files and stores the specified
-maps into a list and combines them all into a RasterBrick.
+This function creates gridded product by taking in a model_data,
+  raster template, a model object or model x and y's, path to prism variables,
 
 This function creates a permanent folder and downloads data
   from the SNODAS website for the selected date(s), map type(s), and data map

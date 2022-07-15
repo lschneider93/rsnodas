@@ -39,16 +39,10 @@ for (i in 2:length(utah_STATIONS)){
 # Keep a subset of the columns. ( ID, LAT, LONG, ELEV, STATE, and NAME...)
 ghcnd_station_info <- ghcnd_station_info[, c("ID", "LATITUDE", "LONGITUDE",
                                              "ELEVATION", "STATE", "NAME")]
-# ut_stat_info <- ghcnd_station_info
 
-
-# GETTING THE DATA from the GCHD ALL FOLDER
-# Define helper functions
-#=============================================================================
-# extract()
-#
-
-get_station_data <- function(stations, source, elem = c("SNWD", "WESD"), progress = TRUE){
+# helper functions
+get_station_data <- function(stations, source,
+                             elem = c("SNWD", "WESD"), progress = TRUE) {
   # Set constants
   #=============================================================================
   files <- paste0(source, stations, ".dly")
@@ -163,13 +157,13 @@ get_station_data <- function(stations, source, elem = c("SNWD", "WESD"), progres
 
 }
 
+# helper functions
 get_state_data <- function(states, source,
                            elem = c("SNWD", "WESD"),
                            progress = TRUE) {
   stations <- ghcnd_stations$ID[ghcnd_stations$STATE %in% states]
   get_station_data(stations, source, elem, progress)
 }
-
 
 ################################################################################
 # Saving the data with the WESD
@@ -184,25 +178,23 @@ utah2 <- get_state_data("UT", source ="C:/Users/Logan/Desktop/ghcnd_all/",
 utah2$VALUE <- (utah2$VALUE / 10)
 
 # save the ghcnd_station_info of lat, lon into the utah2 data frame.
-utah2[, "ELEVATION"] <- 0
-utah2[, 'LONGITUDE'] <- 0
-utah2[, "LATITUDE"] <- 0
 utah2[, "NAME"] <- " "
-utah2$annual_max_temp <- 0
-utah2$annual_max_vapor <- 0
-utah2$annual_mean_dew <- 0
-utah2$annual_mean_temp <- 0
-utah2$annual_min_temp <- 0
-utah2$annual_min_vapor <- 0
-utah2$annual_precip <- 0
-utah2$slope <- 0
-utah2$aspect <- 0
+utah2[, c("LONGITUDE", "LATITUDE", "ELEVATION", "elevation",
+          'tmax_normal_annual', "vpdmax_normal_annual",
+          "tdmean_normal_annual", "tmean_normal_annual",
+          "tmin_normal_annual", "vpdmin_normal_annual",
+          "ppt_normal_annual","slope", "aspect",
+          "ppt_2013_12", "ppt_2014_01", "ppt_2014_02",
+          "tmean_2013_11_15", "tmean_2013_11_16", "tmean_2013_11_17",
+          "vpdmin_2019", "vpdmax_2017")] <- 0
 
 # Make ghcnd_station_info an sf object.
 ghcnd_station_sf <- sf::st_as_sf(ghcnd_station_info,
                                  coords = c("LONGITUDE", "LATITUDE"),
                                  crs = sf::st_crs(4326))
 
+# Read in PRISM from the folder, this will be different based on where
+#   you put everything
 # Read in PRISM
 mon <- c('annual')
 v <- c("annual")
@@ -215,8 +207,10 @@ info <- c('max temp',
           "minimum vapor pressure deficit",
           "precipitation",
           "elevation")
-info_names <- c('max_temp', "max_vp", "mean_dew_temp", "mean_temp",
-                "min_temp", "min_vp", "precip","ext_elevat")
+info_names <- c('tmax_normal_annual', "vpdmax_normal_annual",
+                "tdmean_normal_annual", "tmean_normal_annual",
+                "tmin_normal_annual", "vpdmin_normal_annual",
+                "ppt_normal_annual","elevation")
 
 file_type <- c("tmax_30yr_normal_800mM2_",
                "vpdmax_30yr_normal_800mM2_",
@@ -247,18 +241,12 @@ for (i in 1:8) {
                                                                    ghcnd_station_sf)
 }
 
-# Extract the slope and aspect. r
-# ele_terra <- terra::rast(paste0("C:/Users/Logan/Desktop/PRISM/annual",
-#                                 "/monthly/", info[i], "/PRISM_",
-#                                 file_type[i], "asc.asc"))
-
+# Derive the slope and aspect from the elevation
 ele_terra2 <- terra::rast(r)
-
 slope_terra <- terra::terrain(ele_terra2, neighbors = 8,
                               v = "slope", unit = "degrees")
 aspect_terra <- terra::terrain(ele_terra2, neighbors = 8,
                                v = "aspect", unit = "degrees")
-
 
 ghcnd_station_terra <- terra::vect(ghcnd_station_sf)
 ghcnd_station_info[, "slope"] <- terra::extract(slope_terra,
@@ -266,10 +254,92 @@ ghcnd_station_info[, "slope"] <- terra::extract(slope_terra,
 ghcnd_station_info[, "aspect"] <- terra::extract(aspect_terra,
                                                  ghcnd_station_terra)[, 2]
 
+# Adding the column names of ppt 2003_11_15 tmean 2003
+model_x <- c("ppt_2013_12", "ppt_2014_01", "ppt_2014_02", "elevation",
+             "tmean_2013_11_15", "tmean_2013_11_16", "tmean_2013_11_17",
+             "vpdmin_2019", "vpdmax_2017")
+
+################################################################################
+################################################################################
+################################################################################
+rm_asp_slop_elev <- function(x) {
+  # match and see which elements in vector correspond with the
+  l <- match(c("aspect","elevation", "slope"), x)
+
+  # need to remove the NA arguments, then remove the other arguments
+  l <- l[!is.na(l)]
+  x[-l]
+}
+
+get_prism_info <- function(x) {
+  # split the character variable by the "-"
+  nat <- unlist(strsplit(x, "_"))
+
+  # get the information
+  name <- nat[1]
+  year <- nat[2]
+  mon <- nat[3]
+  day <- nat[4]
+
+  info <- c(name, year, mon, day)
+  info <- info[!is.na(info)]
+  return(info)
+}
+
+# rm_model_x <- rsnodas:::rm_asp_slop_elev(model_x)
+rm_model_x <- rm_asp_slop_elev(model_x)
+
+for (i in 1:length(rm_model_x)) {
+
+  info <- get_prism_info(rm_model_x[i])
+  l_num <- length(info)
+
+  # Annual normal
+  if (info[2] == "normal" & info[l_num] == "annual") {
+    prism_fp <- paste0("PRISM_", info[1], "_30yr_normal_800m",
+                       "M2_", info[l_num], "_bil.bil")
+
+    # Annual 04 month
+  } else if (info[2] == "normal" &
+             info[l_num] %in% c("01", "02", "03", "04", "05", "06",
+                                "07", "08", "09", "10", "11", "12")) {
+
+    prism_fp <- paste0("PRISM_", info[1], "_30yr_normal_800m",
+                       "M2_", info[l_num], "_bil.bil")
+
+    # Daily Map
+  } else if (info[2] != "normal" & length(info) == 4) {
+    prism_fp <- paste0("PRISM_", info[1], "_stable_4kmD2_",
+                       info[2], info[3], info[4], "_bil.bil")
+
+    # Monthly map
+  } else if (info[2] != "normal" & length(info) == 3) {
+    prism_fp <- paste0("PRISM_", info[1], "_stable_4kmM3_",
+                       info[2], info[3], "_bil.bil")
+
+    # PRISM_ppt_stable_4kmM3_201703_bil
+    # yearly data
+  } else if (info[2] != "normal" & length(info) == 2) {
+    prism_fp <- paste0("PRISM_", info[1], "_stable_4kmM3_",
+                       info[2], "_bil.bil")
+  }
+
+  path_to_prism <- "C:/Users/Logan/Desktop/GitHub/prism"
+  # This is for Elevation because it is different
+  r <- stars::read_stars(paste0(path_to_prism, "/", prism_fp))
+
+  # Reproject the stars object to have the same CRS
+  r <- stars::st_warp(r, crs = sf::st_crs(4326))
+
+  # Extract the Values from the Raster and store in the ghcnd data frame
+  ghcnd_station_info[, paste0(rm_model_x[i])] <- stars::st_extract(r,
+                                                                   ghcnd_station_sf)
+}
+
 
 # Get just april 1st snotel data
 april_1_snotel_data <- utah2[(utah2$DATE == "1982-04-01"), ]
-year <- 1982:2021# length(year)
+year <- 1982:2022# length(year)
 for (i in 2:length(year)) {
  april_1_snotel_data <- rbind(april_1_snotel_data,
                              utah2[(utah2$DATE == paste0(year[i], "-04-01")), ])
@@ -278,95 +348,98 @@ for (i in 2:length(year)) {
 # Extract the following information: elev, lat, lon, name, and prism variables.
 for (i in 1:length(april_1_snotel_data$ID)) {
   st_info <- april_1_snotel_data$ID[i] == ghcnd_station_info$ID
-  april_1_snotel_data[, "ELEVATION"][i] <- ghcnd_station_info[st_info, "ELEVATION"]
   april_1_snotel_data[, 'LONGITUDE'][i] <- ghcnd_station_info[st_info, "LONGITUDE"]
   april_1_snotel_data[, "LATITUDE"][i] <- ghcnd_station_info[st_info, "LATITUDE"]
   april_1_snotel_data[, "NAME"][i] <- ghcnd_station_info[st_info, "NAME"]
-  april_1_snotel_data$annual_max_temp[i] <- ghcnd_station_info[st_info, "max_temp"]
-  april_1_snotel_data$annual_max_vapor[i] <- ghcnd_station_info[st_info, "max_vp"]
-  april_1_snotel_data$annual_mean_dew[i] <- ghcnd_station_info[st_info, "mean_dew_temp"]
-  april_1_snotel_data$annual_mean_temp[i] <- ghcnd_station_info[st_info, "mean_temp"]
-  april_1_snotel_data$annual_min_temp[i] <- ghcnd_station_info[st_info, "min_temp"]
-  april_1_snotel_data$annual_min_vapor[i] <- ghcnd_station_info[st_info, "min_vp"]
-  april_1_snotel_data$annual_precip[i] <- ghcnd_station_info[st_info, "precip"]
-  april_1_snotel_data$slope[i] <- ghcnd_station_info[st_info, "slope"]
-  april_1_snotel_data$aspect[i] <- ghcnd_station_info[st_info, "aspect"]
+
+  # annual Normals
+  april_1_snotel_data[, "tmax_normal_annual"][i] <- ghcnd_station_info[st_info, "tmax_normal_annual"]
+  april_1_snotel_data[, "vpdmax_normal_annual"][i] <- ghcnd_station_info[st_info, "vpdmax_normal_annual"]
+  april_1_snotel_data[, "tdmean_normal_annual"][i] <- ghcnd_station_info[st_info, "tdmean_normal_annual"]
+  april_1_snotel_data[, "tmean_normal_annual"][i] <- ghcnd_station_info[st_info, "tmean_normal_annual"]
+  april_1_snotel_data[, "tmin_normal_annual"][i] <- ghcnd_station_info[st_info, "tmin_normal_annual"]
+  april_1_snotel_data[, "vpdmin_normal_annual"][i] <- ghcnd_station_info[st_info, "vpdmin_normal_annual"]
+  april_1_snotel_data[, "ppt_normal_annual"][i] <- ghcnd_station_info[st_info, "ppt_normal_annual"]
+
+  # annual Normals
+  april_1_snotel_data[, "elevation"][i] <- ghcnd_station_info[st_info, "elevation"]
+  april_1_snotel_data[, "slope"][i] <- ghcnd_station_info[st_info, "slope"]
+  april_1_snotel_data[, "aspect"][i] <- ghcnd_station_info[st_info, "aspect"]
+  april_1_snotel_data[, "ppt_2013_12"][i] <- ghcnd_station_info[st_info, "ppt_2013_12"]
+  april_1_snotel_data[, "ppt_2014_01"][i] <- ghcnd_station_info[st_info, "ppt_2014_01"]
+  april_1_snotel_data[, "ppt_2014_02"][i] <- ghcnd_station_info[st_info, "ppt_2014_02"]
+  april_1_snotel_data[, "tmean_2013_11_15"][i] <- ghcnd_station_info[st_info, "tmean_2013_11_15"]
+  april_1_snotel_data[, "tmean_2013_11_16"][i] <- ghcnd_station_info[st_info, "tmean_2013_11_16"]
+  april_1_snotel_data[, "tmean_2013_11_17"][i] <- ghcnd_station_info[st_info, "tmean_2013_11_17"]
+  april_1_snotel_data[, "vpdmin_2019"][i] <- ghcnd_station_info[st_info, "vpdmin_2019"]
+  april_1_snotel_data[, "vpdmax_2017"][i] <- ghcnd_station_info[st_info, "vpdmax_2017"]
+
 }
 
 # save the april 1st snotel data
 usethis::use_data(april_1_snotel_data, overwrite = TRUE)
 
 
-# Making UA maps data tif object
-year <- 1982:2020
-base_file <- "data-raw/ua_data/4km_SWE_Depth_WY"
-end_file <- "_v01.nc"
-
-ua_us_maps <- vector("list", length(year))
-"%>%" <- magrittr::"%>%"
-
-ut_map <- maps::map("state", plot = FALSE, fill = TRUE) %>%
-  sf::st_as_sf() %>%
-  dplyr::filter(ID == "utah") %>%
-  sf::st_transform(crs = sf::st_crs(4326))
-
-# ut_map2 <- sf::st_read("C:/Users/Logan/Desktop/utah_shp 2/Utah.shp")
-# ut_map2 <- sf::st_transform(ut_map2["2", "STATE"],
-#                             crs = sf::st_crs(4326))
-
-# get the university maps for each year, can crop to a different state...
-for (i in 1:length(year)) {
-  # read in the file
-  # ua_star <- stars::read_ncdf(paste0(base_file, year[i], end_file))
-  ua_map <- terra::rast(paste0(base_file, year[i], end_file))
-  # b <- raster::brick(paste0(base_file, year[i], end_file))
-
-  # Find the layer with april 1st by checking it it is a leap year
-  april_1 <- ifelse(terra::nlyr(ua_map) == 730, 183, 184)
-  ua_map <- terra::subset(ua_map, april_1)
-
-  # write a tif object. note this will be deleted
-  #   for some reason the terra won't let me change to the correct crs
-  # terra::project(ua_terra, sf::st_crs(4326))
-  # terra::project(ua_terra, ("+proj=utm +zone=10 +datum=WGS84"))
-  # terra::project(ua_terra, "+proj=longlat +datum=WGS84 +no_defs")
-  # stars::st_as_stars(ua_terra)
-  terra::writeRaster(ua_map, "data-raw/swe.tif", overwrite=TRUE)
-  ua_map <- stars::read_stars("data-raw/swe.tif")
-
-  ua_map <- stars::st_warp(ua_map, crs = sf::st_crs(4326))
-
-  # crop to the state of utah
-  ua_ut <- sf::st_crop(ua_map, ut_map)
-
-  # store in a  list
-  ua_us_maps[[i]] <- ua_ut # ua_map
-}
-
-# go through the list of maps and combine to a stars stack
-for (i in 2:length(ua_us_maps)) {
-  # Combine/Concatenate the first 2 maps
-  if (i == 2) {
-    combined_ua <- c(ua_us_maps[[(i - 1)]], ua_us_maps[[i]])
-  } else {
-    # Combine the later maps
-    combined_ua <- c(combined_ua, ua_us_maps[[i]])
-  }
-}
-
-# Rename each object to contain the dates by creating a vector of SWE_MM_DD_YYYY
-a <- vector("character", length(combined_ua))
-for (i in 1:length(combined_ua)) {
-  a[i] <- paste0("SWE_04_01_", year[i])
-}
-
-# Renaming and combine
-names(combined_ua) <- a
-combined_ua_us <- merge(combined_ua)
-combined_ua_us <- stars::st_set_dimensions(combined_ua_us,
-                                           names = c("x", "y", "time"))
-
-# Write as an object
-# stars::write_stars(combined_ua_us, "data/ua_april1.tif")
-stars::write_stars(combined_ua_us, "data-raw/ua_ut_april1.tif")
-# usethis::use_data(utah2, overwrite = TRUE)
+# # Making UA maps data tif object
+# year <- 1982:2020
+# base_file <- "data-raw/ua_data/4km_SWE_Depth_WY"
+# end_file <- "_v01.nc"
+#
+# ua_us_maps <- vector("list", length(year))
+# "%>%" <- magrittr::"%>%"
+#
+# ut_map <- maps::map("state", plot = FALSE, fill = TRUE) %>%
+#   sf::st_as_sf() %>%
+#   dplyr::filter(ID == "utah") %>%
+#   sf::st_transform(crs = sf::st_crs(4326))
+#
+# # get the university maps for each year, can crop to a different state...
+# for (i in 1:length(year)) {
+#
+#   ua_map <- terra::rast(paste0(base_file, year[i], end_file))
+#
+#   # Find the layer with april 1st by checking it it is a leap year
+#   april_1 <- ifelse(terra::nlyr(ua_map) == 730, 183, 184)
+#   ua_map <- terra::subset(ua_map, april_1)
+#
+#   # write a tif object. note this will be deleted
+#   #   for some reason the terra won't let me change to the correct crs
+#   terra::writeRaster(ua_map, "data-raw/swe.tif", overwrite=TRUE)
+#   ua_map <- stars::read_stars("data-raw/swe.tif")
+#
+#   ua_map <- stars::st_warp(ua_map, crs = sf::st_crs(4326))
+#
+#   # crop to the state of utah
+#   ua_ut <- sf::st_crop(ua_map, ut_map)
+#
+#   # store in a  list
+#   ua_us_maps[[i]] <- ua_ut # ua_map
+# }
+#
+# # go through the list of maps and combine to a stars stack
+# for (i in 2:length(ua_us_maps)) {
+#   # Combine/Concatenate the first 2 maps
+#   if (i == 2) {
+#     combined_ua <- c(ua_us_maps[[(i - 1)]], ua_us_maps[[i]])
+#   } else {
+#     # Combine the later maps
+#     combined_ua <- c(combined_ua, ua_us_maps[[i]])
+#   }
+# }
+#
+# # Rename each object to contain the dates by creating a vector of SWE_MM_DD_YYYY
+# a <- vector("character", length(combined_ua))
+# for (i in 1:length(combined_ua)) {
+#   a[i] <- paste0("SWE_04_01_", year[i])
+# }
+#
+# # Renaming and combine
+# names(combined_ua) <- a
+# combined_ua_us <- merge(combined_ua)
+# combined_ua_us <- stars::st_set_dimensions(combined_ua_us,
+#                                            names = c("x", "y", "time"))
+#
+# # Write as an object
+# # stars::write_stars(combined_ua_us, "data/ua_april1.tif")
+# stars::write_stars(combined_ua_us, "data-raw/ua_ut_april1.tif")
+# # usethis::use_data(utah2, overwrite = TRUE)

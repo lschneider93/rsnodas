@@ -12,46 +12,64 @@
 sd_CV_GM <- numeric()
 sd_CV_GR <- numeric()
 sd_CV_S_G_50 <- numeric()
+sd_CV_S_G_UA_50 <- numeric()
 sd_CV_S_G_60 <- numeric()
+sd_CV_S_G_UA_60 <- numeric()
 sd_CV_S_G_70 <- numeric()
+sd_CV_S_G_UA_70 <- numeric()
 sd_CV_S_G_80 <- numeric()
+sd_CV_S_G_UA_80 <- numeric()
+sd_CV_S_G_UA_90 <- numeric()
 sd_CV_S_G_90 <- numeric()
+sd_CV_S_G_UA_100 <- numeric()
 sd_CV_S_G_100 <- numeric()
-
+sd_UA <- numeric()
 sd_S <- numeric()
-# sd_F_G <- numeric()
-# sd_F_G_S <- numeric()
-# sd_F_G_S_UA <- numeric()
+sd_F_G <- numeric()
+sd_F_G_S <- numeric()
+sd_F_G_S_UA <- numeric()
 
-
+# sd_S_G_UA2 <- numeric()
 
 median_CV_GM <- numeric()
 median_CV_GR <- numeric()
 median_CV_S_G_50 <- numeric()
+median_CV_S_G_UA_50 <- numeric()
 median_CV_S_G_60 <- numeric()
+median_CV_S_G_UA_60 <- numeric()
 median_CV_S_G_70 <- numeric()
+median_CV_S_G_UA_70 <- numeric()
 median_CV_S_G_80 <- numeric()
+median_CV_S_G_UA_80 <- numeric()
+median_CV_S_G_UA_90 <- numeric()
 median_CV_S_G_90 <- numeric()
+median_CV_S_G_UA_100 <- numeric()
 median_CV_S_G_100 <- numeric()
+median_UA <- numeric()
 median_S <- numeric()
-
-
+median_F_G <- numeric()
+median_F_G_S <- numeric()
+median_F_G_S_UA <- numeric()
 
 april_1_snotel_2003[, "CV_GAM_RASTER_PREDS"]
+april_1_snotel_2003[, "CV_GAM_SNODAS_UA_50_50"]
 april_1_snotel_2003[, "CV_GAM_SNODAS_50_50"]
+april_1_snotel_2003[, "CV_GAM_SNODAS_UA_60_40"]
 april_1_snotel_2003[, "CV_GAM_SNODAS_60_40"]
+april_1_snotel_2003[, "CV_GAM_SNODAS_UA_70_30"]
 april_1_snotel_2003[, "CV_GAM_SNODAS_70_30"]
+april_1_snotel_2003[, "CV_GAM_SNODAS_UA_80_20"]
 april_1_snotel_2003[, "CV_GAM_SNODAS_80_20"]
+april_1_snotel_2003[, "CV_GAM_SNODAS_UA_90_10"]
 april_1_snotel_2003[, "CV_GAM_SNODAS_90_10"]
+april_1_snotel_2003[, "CV_GAM_SNODAS_UA_100"]
 april_1_snotel_2003[, "CV_GAM_SNODAS_100"]
 
-
-
 # One problem is dealing with NA's
-# dim(april_1_snotel_2003[is.na(april_1_snotel_2003$UA_VALUE), ]) # 141 observations are NA
+dim(april_1_snotel_2003[is.na(april_1_snotel_2003$UA_VALUE), ]) # 141 observations are NA
 
 # What sites are NA's for UA value?
-# table(april_1_snotel_2003[is.na(april_1_snotel_2003$UA_VALUE), ]$NAME) # 141 observations are NA
+table(april_1_snotel_2003[is.na(april_1_snotel_2003$UA_VALUE), ]$NAME) # 141 observations are NA
 
 # table(april_1_snotel_2003$CV_GAM_RASTER_PREDS == april_1_snotel_2003$CV_GAM_RASTER_COMB_PREDS)
 # april_1_snotel_2003$GAM_PREDS
@@ -59,7 +77,7 @@ april_1_snotel_2003[, "CV_GAM_SNODAS_100"]
 # table(is.na(april_1_snotel_2003$CV_GAM_RASTER_COMB_PREDS))
 
 
-for (i in 1:(length(years))) {
+for (i in 1:(length(years) - 1)) {
   sd_CV_GM[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                       april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_MODEL)
 
@@ -68,26 +86,40 @@ for (i in 1:(length(years))) {
 
   sd_CV_S_G_50[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                        april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_50_50)
-
+  sd_CV_S_G_UA_50[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                          april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_UA_50_50)
   sd_CV_S_G_60[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                           april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_60_40)
-
+  sd_CV_S_G_UA_60[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                            april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_UA_60_40)
   sd_CV_S_G_70[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                           april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_70_30)
-
+  sd_CV_S_G_UA_70[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                             april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_UA_70_30)
   sd_CV_S_G_80[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                           april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_80_20)
-
+  sd_CV_S_G_UA_80[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                             april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_UA_80_20)
   sd_CV_S_G_90[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                           april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_90_10)
-
+  sd_CV_S_G_UA_90[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                             april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_UA_90_10)
   sd_CV_S_G_100[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                           april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_100)
+  sd_CV_S_G_UA_100[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                             april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_UA_100)
 
+  sd_UA[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                   april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$UA_VALUE)
   sd_S[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                   april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$SNODAS_VALUE)
+  sd_F_G[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                    april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$FULL_GAM_VALUE)
+  sd_F_G_S[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                      april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$FULL_GAM_SNODAS_VALUE)
+  sd_F_G_S_UA[i] <- sd(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                         april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$FULL_COMB_VALUE)
 
-  # Median's
   median_CV_GM[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                               april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_MODEL)
   median_CV_GR[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
@@ -95,43 +127,56 @@ for (i in 1:(length(years))) {
 
   median_CV_S_G_50[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                           april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_50_50)
-
+  median_CV_S_G_UA_50[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                             april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_UA_50_50)
   median_CV_S_G_60[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                           april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_60_40)
-
+  median_CV_S_G_UA_60[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                             april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_UA_60_40)
   median_CV_S_G_70[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                           april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_70_30)
-
+  median_CV_S_G_UA_70[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                             april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_UA_70_30)
   median_CV_S_G_80[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                           april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_80_20)
-
+  median_CV_S_G_UA_80[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                             april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_UA_80_20)
   median_CV_S_G_90[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                           april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_90_10)
-
+  median_CV_S_G_UA_90[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                             april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_UA_90_10)
   median_CV_S_G_100[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                            april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_100)
+  median_CV_S_G_UA_100[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                              april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_UA_100)
 
+
+  median_UA[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                           april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$UA_VALUE)
   median_S[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                           april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$SNODAS_VALUE)
-
+  median_F_G[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                            april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$FULL_GAM_VALUE)
+  median_F_G_S[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                              april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$FULL_GAM_SNODAS_VALUE)
+  median_F_G_S_UA[i] <- median(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                                 april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$FULL_COMB_VALUE)
 }
 
 #
-df <- as.data.frame(cbind(years,
+df <- as.data.frame(cbind(years[-19],
                           median_CV_GR,
-                          median_CV_S_G_100,
-                          # median_UA,
+                          median_CV_S_G_50,
+                          median_UA,
                           median_S
 ))
 
 colnames(df) <- c("years", "GAM", "SNO_GAM",
                   # "SNO_GAM_UA",
-                  #"UA",
-                  "SNODAS")
+                  "UA", "SNODAS")
 
 ##### JUST the medians
-ldf <- tidyr::gather(df, "SNODAS", "GAM",
-                     #"UA",
+ldf <- tidyr::gather(df, "SNODAS", "GAM", "UA",
                      "SNO_GAM",
                      # "SNO_GAM_UA",
                      key = "model_type",
@@ -144,11 +189,9 @@ g <- ggplot(ldf, aes(y = residual_value, x = years, color = model_type)) +
   theme(plot.title = element_text(hjust = 0.5, size = 26),
         text = element_text(size = 20)) +
   # scale_color_brewer(palette = "Dark2") +
-  scale_color_manual(values = c("royalblue",
-                                "tan4",
+  scale_color_manual(values = c("royalblue", "tan4",
                                 # "lightsalmon2",
-                                # "gray0",
-                                "green4")) # +
+                                "gray0", "green4")) # +
   # ylim(c(-50, 210))
 g
   # "gray0", "springgreen4", lightsalmon2, green4
@@ -167,19 +210,17 @@ ggsave(filename = paste0("Time Series of Median of Errors", ".png"),
 )
 
 
-df <- as.data.frame(cbind(years,
+df <- as.data.frame(cbind(years[-19],
                           sd_CV_GR, # length(sd_CV_GR)
                           sd_CV_S_G_50, # length(sd_CV_S_G)
-                          # sd_UA, # length(sd_UA)
+                          sd_UA, # length(sd_UA)
                           sd_S # length(sd_S)
 ))
 
 colnames(df) <- c("years", "GAM", "SNO_GAM", "UA", "SNODAS" )#, "SNO_GAM_UA")
 
 ##### JUST the medians
-ldf <- tidyr::gather(df, "SNODAS",
-                     "GAM",
-                     #"UA",
+ldf <- tidyr::gather(df, "SNODAS", "GAM", "UA",
                      "SNO_GAM",
                      # "SNO_GAM_UA",
                      key = "model_type",
@@ -192,11 +233,9 @@ g <- ggplot(ldf, aes(y = residual_value, x = years, color = model_type)) +
         text = element_text(size = 20)) +
   ggtitle("Time Series of Median of Errors") +
   ylab("Median Residual Value") +
-  scale_color_manual(values = c("royalblue",
-                                "tan4",
+  scale_color_manual(values = c("royalblue", "tan4",
                                 #"lightsalmon2",
-                                # "gray0",
-                                "green4")) # +
+                                "gray0", "green4")) # +
   # ylim(c(-25, 210))
 g
 
