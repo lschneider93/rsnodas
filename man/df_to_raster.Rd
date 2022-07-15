@@ -4,13 +4,16 @@
 \alias{df_to_raster}
 \title{Generate a raster from data frame}
 \usage{
-df_to_raster(model, df)
+df_to_raster(model, data_frame, raster_template)
 }
 \arguments{
 \item{model}{the model object that will be used to predict.}
 
-\item{df}{a data frame with the columns of the model that will
+\item{data_frame}{a data frame with the columns of the model that will
 be used to create the raster}
+
+\item{raster_template}{a stars object that is contains the area and
+projection wanted.}
 }
 \value{
 a stars object that contains the predictions of the model
@@ -22,9 +25,7 @@ Generate a raster from data frame
 This function creates gridded product by taking in a model_data,
   raster template, a model object or model x and y's, path to prism variables,
 
-This function creates a permanent folder and downloads data
-  from the SNODAS website for the selected date(s), map type(s), and data map
-  that the user provides. This data is stored in the permanent folder.
-  The function unzips the selected data files and stores the specified
-  maps into a list of star objects.
+Takes a model and a data frame of climate variables that will be
+  used to predict estimates in a raster or grid format. This will return
+  a stars object of the estimates.
 }

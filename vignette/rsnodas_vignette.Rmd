@@ -147,7 +147,7 @@ download_all_ghcnd_stations(directory = ".")
 
 # april 1st data for SNOTEL stations in Utah and subset to just April 1st, 2014.
 snotel_ut <- rsnodas::april_1_snotel_data
-snotel_ut_2014 <- snotel_ut[snotel_ut$DATE == "2014-04-01", ]
+snotel_ut_2015 <- snotel_ut[snotel_ut$DATE == "2015-04-01", ]
 ```
 
 ## Download PRISM climate data
@@ -197,22 +197,22 @@ After downloading the point data provided by SNOTEL sites and climate variables 
 
 ```{r gam, eval = FALSE, echo = TRUE}
 # creation of a data frame with all the PRISM variables of precipitation and elevation
-gam_2014 <- gam_to_df(model_data = snotel_ut_2014,
-                      raster_template = snodas_ut_2014,
+gam_2015 <- gam_to_df(model_data = snotel_ut_2015,
+                      raster_template = snodas_april1[[2]],
                       path_to_prism = "/Users/loganschneider/Desktop/GitHub/prism",
-                      model_x <- c("ppt_normal_annual", "elevation"),
+                      model_x <- c("ppt_normal_annual", "elevation", "slope", "aspect"),
                       model_y <- c("VALUE"),
                       coords = c("LONGITUDE", "LATITUDE"))
 
 # This allows users to explore using different models with the same climate variables. 
-model <- mgcv::gam(data = snotel_ut_2014,
+model <- mgcv::gam(data = snotel_ut_2015,
                    VALUE ~ s(LONGITUDE, LATITUDE, bs = "sos", k = 25) +                          
-                  s(ppt_normal_annual) +
+                  s(ppt_normal_annual) + s(aspect) + s(slope) + 
                   s(elevation),
                 method = "REML")
 
 # After creating a model, we can make predictions with the information available.
-gam_rast <- df_to_raster(model = model, df = gam_2014)
+gam_rast <- df_to_raster(model = model, df = gam_2015)
 
 g <- ggplot() + 
   stars::geom_stars(data = gam_rast) +
@@ -237,7 +237,7 @@ dens_2014 <- points_to_density_stars(sp_points = snotel_ut_2014,
                                      coords = c("LONGITUDE", "LATITUDE"),
                                      raster_template = snodas_ut_2014,
                                      sigma = 15000,
-                                     max_weight = .80,
+                                     max_weight = 1,
                                      flat_crs = "+proj=utm + zone=12 + datum=WGS84")
 
 ggplot() + 

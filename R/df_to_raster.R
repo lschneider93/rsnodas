@@ -3,6 +3,8 @@
 #' @param model the model object that will be used to predict.
 #' @param data_frame a data frame with the columns of the model that will
 #'   be used to create the raster
+#' @param raster_template a stars object that is contains the area and
+#'   projection wanted.
 #'
 #' @return a stars object that contains the predictions of the model
 #'
@@ -11,21 +13,17 @@
 #'
 #'
 #' @importFrom stats predict
-#' @importFrom methods hasArg
-#' @importFrom sf st_coordinates st_as_sf st_crs
-#' @importFrom stars read_stars st_warp st_as_stars
-#' @importFrom terra terrain rast vect extract
-#' @importFrom mgcv gam
+#' @importFrom sf st_crs
+#' @importFrom stars st_warp st_as_stars
 #'
-#' @details This function creates a permanent folder and downloads data
-#'   from the SNODAS website for the selected date(s), map type(s), and data map
-#'   that the user provides. This data is stored in the permanent folder.
-#'   The function unzips the selected data files and stores the specified
-#'   maps into a list of star objects.
+#' @details Takes a model and a data frame of climate variables that will be
+#'   used to predict estimates in a raster or grid format. This will return
+#'   a stars object of the estimates.
 #'
 #' @export
 df_to_raster <- function(model,
-                         data_frame) {
+                         data_frame,
+                         raster_template) {
 
   #  Finally Make predictions :0
   model_predictions <- stats::predict(model, newdata = df)

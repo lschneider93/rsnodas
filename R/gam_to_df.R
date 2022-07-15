@@ -40,12 +40,38 @@ gam_to_df <- function(model_data,
                           coords = c("LONGITUDE", "LATITUDE"),
                           path_to_prism) {
 
-  model_data = snotel_ut_2014
-  raster_template = snodas_ut_2014
-  path_to_prism = "/Users/loganschneider/Desktop/GitHub/prism"
-  model_x <- c("ppt_normal_annual", "elevation")
-  model_y <- c("VALUE")
-  coords = c("LONGITUDE", "LATITUDE")
+  get_prism_info <- function(x) {
+    # split the character variable by the "-"
+    nat <- unlist(strsplit(x, "_"))
+
+    # get the information
+    name <- nat[1]
+    year <- nat[2]
+    mon <- nat[3]
+    day <- nat[4]
+
+    info <- c(name, year, mon, day)
+    info <- info[!is.na(info)]
+    return(info)
+  }
+
+  rm_asp_slop_elev <- function(x) {
+    # match and see which elements in vector correspond with the
+    l <- match(c("aspect","elevation", "slope"), x)
+
+    # need to remove the NA arguements
+    l <- l[!is.na(l)]
+
+    # remove the other arguments
+    x[-l]
+  }
+
+  # model_data = snotel_ut_2014
+  # raster_template = snodas_ut_2014
+  # path_to_prism = "/Users/loganschneider/Desktop/GitHub/prism"
+  # model_x <- c("ppt_normal_annual", "elevation")
+  # model_y <- c("VALUE")
+  # coords = c("LONGITUDE", "LATITUDE")
 
   # We are going to Make Raster layer of GAM predictions.
   # First, make a data frame of all the grid cells longitude and latitude
@@ -94,13 +120,13 @@ gam_to_df <- function(model_data,
       df[, "aspect"] <- terra::extract(aspect_terra, ghcnd_station_terra)[, 2]
 
       # remove the aspect slope and elevation from the model variables
-      rm_model_x <- rsnodas:::rm_asp_slop_elev(l_model_x)
+      rm_model_x <- rm_asp_slop_elev(l_model_x)
     }
 
     # get the PRISM data for the rest of the variables
     for (i in 1:length(rm_model_x)) {
 
-      info <- rsnodas:::get_prism_info(rm_model_x[i])
+      info <- get_prism_info(rm_model_x[i])
       l_num <- length(info)
 
       # Annual normal
