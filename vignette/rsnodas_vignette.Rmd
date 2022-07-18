@@ -109,12 +109,13 @@ snodas_2021 <- download_snodas(dates = format_dates(day = 1,
                 overwrite = TRUE,
                 remove_zip = TRUE,
                 data_saved = c('swe'),
-                out_dir = paste0(getwd(), "/snodas_data")) #
+                out_dir = paste0(getwd(), "/snodas_data"),
+                GTiff = FALSE) #
 ```
 
 After downloading SNODAS, you can crop it to the area or state of interest.  These next portion of code gets a shape file of Utah from the \texttt{maps} package, crops the SNODAS map to the state of Utah, and creates a visual by using \texttt{ggplot2}.
 
-```{r snodas2, echo = TRUE, eval = TRUE}
+```{r snodas2, echo = TRUE, eval = TRUE, fig.dim=c(4.35, 4.15), fig.align='center'}
 # get the pipe function from magrittr
 "%>%" <- magrittr::"%>%"
 
@@ -134,8 +135,8 @@ ggplot() +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
   ggtitle("2021 SNODAS SWE predictions") + 
   scale_fill_viridis_c(option = "A") + 
-  theme(plot.title = element_text(hjust = 0.5, size = 24),
-        text = element_text(size = 22))
+  theme(plot.title = element_text(hjust = 0.5, size = 18),
+        text = element_text(size = 14))
 ```
 
 ## Download PRISM climate data
@@ -150,10 +151,9 @@ The follow example will download monthly precipitation from December 2021 until 
 
 
 ```{r prism2, eval = TRUE, echo = TRUE}
-## NOT RUN, This was ran earlier 
 # Example of downloading 4km monthly precipitation maps from Dec. 2013 - Feb. 2014 
 download_prism(sp_res = "4km", data = c("ppt"), t_res = "monthly",
-               start_date = as.Date("2021-02-01"), end_date = as.Date("2021-03-15"),  
+               start_date = as.Date("2021-03-01"), end_date = as.Date("2021-03-15"),  
                out_dir = paste0(getwd(), "/prism"))
 
 ```
@@ -184,11 +184,11 @@ This section will use the point data provided by SNOTEL sites and climate variab
 This example shows creating a data frame with the Long/Lat of Utah and the variables of monthly precipitation data from March 2022, elevation, and slope. 
 
 ```{r gam, eval = TRUE, echo = TRUE}
-# creation of a data frame with all the PRISM variables of precipitation and elevation
+# creation of a data frame with all the PRISM variables of precipitation 
 gam_2021 <- gam_to_df(model_data = snotel_ut_2021,
                       raster_template = snodas_ut_2021,
                       path_to_prism = paste0(getwd(), "/prism"),
-                      model_x <- c("ppt_2021_03", "elevation", "slope"),
+                      model_x <- c("ppt_2021_03"),
                       model_y <- c("VALUE"),
                       coords = c("LONGITUDE", "LATITUDE"))
 head(gam_2021, 5)
@@ -196,22 +196,31 @@ head(gam_2021, 5)
 
 The second step is to build a model with the SNOTEL station. This could be any model that can have the `predict` function from the \texttt{stats} package applied afterwards. A commmon model used for spatial data is a Generalized Additive Model (GAM).  This is because GAMs account for non-linear effects and can use splines on the sphere (SOS) which account for the spherical shape of the earth. 
 
-The following code creates a GAM with the SNOTEL station information using elevation, slope, and March 2022 PRISM monthly, precipitation
+The following code creates a GAM with the SNOTEL station information using March 2022 PRISM monthly precipitation.
+
 ```{r gam2, eval = TRUE, echo = TRUE}
-# This allows users to explore using different models with the same climate variables. 
+# This allows users to explore using different models with the monthly precipitation 2021. 
 model <- mgcv::gam(data = snotel_ut_2021,
                    VALUE ~ s(LONGITUDE, LATITUDE, bs = "sos", k = 25) +                          
-                  s(ppt_2021_03)  + s(slope) + 
-                  s(elevation),
+                  s(ppt_2021_03),
                 method = "REML")
+
+# This is another example of a model that uses elevation, slope and precipitation.
+# NOTE: In order to run this You MUST download elevation and store it in the same folder.
+# model <- mgcv::gam(data = snotel_ut_2021,
+#                    VALUE ~ s(LONGITUDE, LATITUDE, bs = "sos", k = 25) +                          
+#                   s(ppt_2021_02) + s(slope) + 
+#                   s(elevation),
+#                 method = "REML")
 ```
+
 
 The final step predict the output with the variables throughout the area of interest and create a gridded output of predictions.  This is accomplished by using the `df_to_raster` that takes the previously created model and data frame to create a raster.  
 
 Below is an example of creating a raster predicting SWE using the previous model using elevation, slope and precipitation from March and the data frame with all the points in the area of Utah.
 
-```{r gam3, eval = TRUE, echo = TRUE}
-# After creating a model, we can make predictions of SWwith the information available.
+```{r gam3, eval = TRUE, echo = TRUE, fig.dim=c(4.75, 4.35), fig.align='center'}
+# After creating a model, we can make predictions of SWE with the information available.
 gam_rast <- df_to_raster(model = model,
                          data_frame = gam_2021,
                          raster_template = snodas_ut_2021)
@@ -221,8 +230,8 @@ ggplot() +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
   ggtitle("2021 GAM SWE predictions") + 
   scale_fill_viridis_c(option = "A") + 
-  theme(plot.title = element_text(hjust = 0.5, size = 24),
-        text = element_text(size = 22))
+  theme(plot.title = element_text(hjust = 0.5, size = 16),
+        text = element_text(size = 12))
 
 ```
 
@@ -233,24 +242,25 @@ We have created a map of SWE estimates throughout Utah using point data and clim
 We are going to  blend and weight each map by observation or station density. This uses the `points_to_density_stars` function.  The `sigma` argument will extend the distance and is in meters while the gridded product is in kilometers.  Changing the `max_weight` argument gives more weight to the Generalized Additive model or the model from the in-situ measurements. The max weight needs to be within the range of 0-1. This weight is a percentage and don't want negative percentages or percentages over 100.   
 
 This creates a density map of all the SNOTEL stations in 2022.
-```{r density, eval = TRUE, echo = TRUE}
+```{r density, eval = TRUE, echo = TRUE, fig.dim=c(4.35, 4.15), fig.align='center'}
 dens_2021 <- points_to_density_stars(sp_points = snotel_ut_2021,
                                      coords = c("LONGITUDE", "LATITUDE"),
                                      raster_template = snodas_ut_2021,
                                      sigma = 15000,
                                      max_weight = 1,
                                      flat_crs = "+proj=utm + zone=12 + datum=WGS84")
+names(dens_2021) <- "Weights"
 
 ggplot() + 
   stars::geom_stars(data = dens_2021) +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
-  ggtitle("2014_Station_Density") + 
+  ggtitle("2021 Station Density") + 
   scale_fill_viridis_c(option = "B") + 
-  theme(plot.title = element_text(hjust = 0.5, size = 24),
-        text = element_text(size = 22))
+  theme(plot.title = element_text(hjust = 0.5, size = 18),
+        text = element_text(size = 12))
 
 ```
-
+It is important to note that the Station density follows the Wasatch Mountains.  The data collected from SNOTEL stations are important to predicting how much water is contained in the Snowpacks for flood forecasting and water management. Therefore, it is important that we understand how much water is in the mountain snowpacks.
 
 ## Ensemble SNODAS and GAM predictions
 
@@ -268,8 +278,8 @@ ggplot() +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
   ggtitle("2022 Ensemble Map") + 
   scale_fill_viridis_c(option = "B") + 
-  theme(plot.title = element_text(hjust = 0.5, size = 24),
-        text = element_text(size = 22))
+  theme(plot.title = element_text(hjust = 0.5, size = 18),
+        text = element_text(size = 12))
 
 ```
 

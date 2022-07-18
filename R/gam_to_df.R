@@ -33,32 +33,6 @@ gam_to_df <- function(model_data,
                           coords = c("LONGITUDE", "LATITUDE"),
                           path_to_prism) {
 
-  get_prism_info <- function(x) {
-    # split the character variable by the "-"
-    nat <- unlist(strsplit(x, "_"))
-
-    # get the information
-    name <- nat[1]
-    year <- nat[2]
-    mon <- nat[3]
-    day <- nat[4]
-
-    info <- c(name, year, mon, day)
-    info <- info[!is.na(info)]
-    return(info)
-  }
-
-  rm_asp_slop_elev <- function(x) {
-    # match and see which elements in vector correspond with the
-    l <- match(c("aspect","elevation", "slope"), x)
-
-    # need to remove the NA arguements
-    l <- l[!is.na(l)]
-
-    # remove the other arguments
-    x[-l]
-  }
-
   # model_data = snotel_ut_2014
   # raster_template = snodas_ut_2014
   # path_to_prism = "/Users/loganschneider/Desktop/GitHub/prism"
@@ -83,8 +57,6 @@ gam_to_df <- function(model_data,
 
   # Creating the GAM
     l_model_x <- tolower(model_x)
-
-
 
     # If they have elevation, get slope and aspect now
     ####### ONE POTENTIAL PROBLEM IS THAT ELEVATION NEEDS TO BE LOWER CASE
@@ -113,13 +85,31 @@ gam_to_df <- function(model_data,
       df[, "aspect"] <- terra::extract(aspect_terra, ghcnd_station_terra)[, 2]
 
       # remove the aspect slope and elevation from the model variables
-      rm_model_x <- rm_asp_slop_elev(l_model_x)
-    }
+      # rm_model_x <- rm_asp_slop_elev(l_model_x)
+      l <- match(c("aspect","elevation", "slope"), l_model_x)
+
+      # need to remove the NA arguements
+      l <- l[!is.na(l)]
+
+      # remove the other arguments
+      rm_model_x <- l_model_x[-l]
+    } else {rm_model_x <- l_model_x}
 
     # get the PRISM data for the rest of the variables
     for (i in 1:length(rm_model_x)) {
 
-      info <- get_prism_info(rm_model_x[i])
+      # info <- get_prism_info(rm_model_x[i])
+      nat <- unlist(strsplit(rm_model_x[i], "_"))
+
+      # get the information of variable names, year, month, day
+      name <- nat[1]
+      year <- nat[2]
+      mon <- nat[3]
+      day <- nat[4]
+
+      info <- c(name, year, mon, day)
+      info <- info[!is.na(info)]
+
       l_num <- length(info)
 
       # Annual normal

@@ -10,7 +10,7 @@ download_prism(
   start_date = as.Date("2017-04-01"),
   end_date = as.Date("2017-08-03"),
   t_res = "monthly",
-  out_dir = paste0(getwd(), "/data-raw/prism")
+  out_dir = paste0(getwd())
 )
 }
 \arguments{
