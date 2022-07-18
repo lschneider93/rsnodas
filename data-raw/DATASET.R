@@ -171,7 +171,7 @@ get_state_data <- function(states, source,
 ################################################################################
 # Use the function get_state_data from the ghcnd_add File and get "WESD".
 # *Note that Utah2 has each
-utah2 <- get_state_data("UT", source ="C:/Users/Logan/Desktop/ghcnd_all/",
+utah2 <- get_state_data("UT", source ="/Users/loganschneider/Desktop/rsnoodas package new/improved/deprecated/ghcnd_all/",
                         elem = "WESD")
 
 # Change the units into mm
@@ -183,10 +183,8 @@ utah2[, c("LONGITUDE", "LATITUDE", "ELEVATION", "elevation",
           'tmax_normal_annual', "vpdmax_normal_annual",
           "tdmean_normal_annual", "tmean_normal_annual",
           "tmin_normal_annual", "vpdmin_normal_annual",
-          "ppt_normal_annual","slope", "aspect",
-          "ppt_2013_12", "ppt_2014_01", "ppt_2014_02",
-          "tmean_2013_11_15", "tmean_2013_11_16", "tmean_2013_11_17",
-          "vpdmin_2019", "vpdmax_2017")] <- 0
+          "ppt_normal_annual", "slope", "aspect",
+          "ppt_2021_02", "ppt_2021_03")] <- 0
 
 # Make ghcnd_station_info an sf object.
 ghcnd_station_sf <- sf::st_as_sf(ghcnd_station_info,
@@ -223,14 +221,18 @@ file_type <- c("tmax_30yr_normal_800mM2_",
 
 for (i in 1:8) {
   if (i != 8) {
-    r <- stars::read_stars(paste0("C:/Users/Logan/Desktop/PRISM/annual",
-                                  "/monthly/", info[i], "/PRISM_",
+    r <- stars::read_stars(paste0("/Users/loganschneider/Desktop/GitHub/prism",
+                                  "/PRISM_",
                                   file_type[i], "annual_asc.asc"))
   } else {
+    # # This is for Elevation because it is different
+    # r <- stars::read_stars(paste0("C:/Users/Logan/Desktop/PRISM/annual",
+    #                                "/monthly/", info[i], "/PRISM_",
+    #                                file_type[i], "asc.asc"))
     # This is for Elevation because it is different
-    r <- stars::read_stars(paste0("C:/Users/Logan/Desktop/PRISM/annual",
-                                   "/monthly/", info[i], "/PRISM_",
-                                   file_type[i], "asc.asc"))
+    r <- stars::read_stars(paste0("/Users/loganschneider/Desktop/GitHub/prism",
+                                  "/PRISM_",
+                                  file_type[i], "asc.asc"))
   }
 
   # Reproject the stars object to have the same CRS
@@ -254,10 +256,8 @@ ghcnd_station_info[, "slope"] <- terra::extract(slope_terra,
 ghcnd_station_info[, "aspect"] <- terra::extract(aspect_terra,
                                                  ghcnd_station_terra)[, 2]
 
-# Adding the column names of ppt 2003_11_15 tmean 2003
-model_x <- c("ppt_2013_12", "ppt_2014_01", "ppt_2014_02", "elevation",
-             "tmean_2013_11_15", "tmean_2013_11_16", "tmean_2013_11_17",
-             "vpdmin_2019", "vpdmax_2017")
+# Adding the column names of ppt 2022_02 and  ppt 2022_03
+model_x <- c("ppt_2021_02", "ppt_2021_03", "elevation")
 
 ################################################################################
 ################################################################################
@@ -324,7 +324,7 @@ for (i in 1:length(rm_model_x)) {
                        info[2], "_bil.bil")
   }
 
-  path_to_prism <- "C:/Users/Logan/Desktop/GitHub/prism"
+  path_to_prism <- "/Users/loganschneider/Desktop/GitHub/prism"
   # This is for Elevation because it is different
   r <- stars::read_stars(paste0(path_to_prism, "/", prism_fp))
 
@@ -365,15 +365,8 @@ for (i in 1:length(april_1_snotel_data$ID)) {
   april_1_snotel_data[, "elevation"][i] <- ghcnd_station_info[st_info, "elevation"]
   april_1_snotel_data[, "slope"][i] <- ghcnd_station_info[st_info, "slope"]
   april_1_snotel_data[, "aspect"][i] <- ghcnd_station_info[st_info, "aspect"]
-  april_1_snotel_data[, "ppt_2013_12"][i] <- ghcnd_station_info[st_info, "ppt_2013_12"]
-  april_1_snotel_data[, "ppt_2014_01"][i] <- ghcnd_station_info[st_info, "ppt_2014_01"]
-  april_1_snotel_data[, "ppt_2014_02"][i] <- ghcnd_station_info[st_info, "ppt_2014_02"]
-  april_1_snotel_data[, "tmean_2013_11_15"][i] <- ghcnd_station_info[st_info, "tmean_2013_11_15"]
-  april_1_snotel_data[, "tmean_2013_11_16"][i] <- ghcnd_station_info[st_info, "tmean_2013_11_16"]
-  april_1_snotel_data[, "tmean_2013_11_17"][i] <- ghcnd_station_info[st_info, "tmean_2013_11_17"]
-  april_1_snotel_data[, "vpdmin_2019"][i] <- ghcnd_station_info[st_info, "vpdmin_2019"]
-  april_1_snotel_data[, "vpdmax_2017"][i] <- ghcnd_station_info[st_info, "vpdmax_2017"]
-
+  april_1_snotel_data[, "ppt_2021_02"][i] <- ghcnd_station_info[st_info, "ppt_2021_02"]
+  april_1_snotel_data[, "ppt_2021_03"][i] <- ghcnd_station_info[st_info, "ppt_2021_03"]
 }
 
 # save the april 1st snotel data

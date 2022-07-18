@@ -32,7 +32,7 @@ download_prism <- function(sp_res = "4km", # or 800m
                            start_date = as.Date("2017-04-01"),
                            end_date = as.Date("2017-08-03"),
                            t_res = "monthly", # monthly, yearly
-                           out_dir = paste0(getwd(), "/data-raw/prism")) {
+                           out_dir = paste0(getwd())) {
 
   # Testing to ensure variables are in the correct format
   if ((sp_res != "4km") & (sp_res != "800m")) {

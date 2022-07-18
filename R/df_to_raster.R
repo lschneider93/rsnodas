@@ -26,13 +26,13 @@ df_to_raster <- function(model,
                          raster_template) {
 
   #  Finally Make predictions :0
-  model_predictions <- stats::predict(model, newdata = df)
+  model_predictions <- stats::predict(model, newdata = data_frame)
   model_predictions <- ifelse(model_predictions < 0, 0,
                               model_predictions)
 
   # add the predictions to the data frame of longitude and latitude
-  df$MODEL_PRED <- model_predictions
-  utah <- df[c("LONGITUDE", "LATITUDE", "MODEL_PRED")]
+  data_frame$MODEL_PRED <- model_predictions
+  utah <- data_frame[c("LONGITUDE", "LATITUDE", "MODEL_PRED")]
 
   # creating a stars object with the predictions
   utah_pred_star <- stars::st_as_stars(utah, coords = c("LONGITUDE", "LATITUDE"),

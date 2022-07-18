@@ -5,12 +5,12 @@
 \title{Download SNODAS Data maps}
 \usage{
 download_snodas(
-  dates = c("2010-01-01", "2017-4-1"),
+  dates = c("2021-04-01", "2022-4-1"),
   masked = TRUE,
   overwrite = TRUE,
-  remove_zip = FALSE,
+  remove_zip = TRUE,
   data_saved = c("swe", "SP", "SD", "SPT", "bss", "melt", "SPS", "NSP"),
-  out_dir = "snodas_data",
+  out_dir = paste0(getwd(), "/snodas_data"),
   GTiff = TRUE
 )
 }

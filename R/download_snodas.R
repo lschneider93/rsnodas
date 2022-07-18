@@ -45,14 +45,14 @@
 # Adapted for sf and stars functionality by Logan Schneider (May 2022)
 #
 #' @export
-download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
-                                 masked = TRUE,
-                                 overwrite = TRUE,
-                                 remove_zip = FALSE,
-                                 data_saved = c('swe', 'SP', "SD", "SPT",
-                                                'bss', 'melt', 'SPS', 'NSP'),
-                                 out_dir = "snodas_data",
-                                 GTiff = TRUE) {
+download_snodas <- function(dates = c("2021-04-01", "2022-4-1"),
+                            masked = TRUE,
+                            overwrite = TRUE,
+                            remove_zip = TRUE,
+                            data_saved = c('swe', 'SP', "SD", "SPT",
+                                           'bss', 'melt', 'SPS', 'NSP'),
+                            out_dir = paste0(getwd(), "/snodas_data"),
+                            GTiff = TRUE) {
 
   # Check to make sure the inputs are correct
   # Check masked, overwrite, removed, and GTiff is logical expressions
@@ -139,8 +139,8 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
 
     # create file paths to temporary data folder and output folder
     swe.dat.gz <- gsub(".txt.", ".dat.", swe.txt.gz, fixed = TRUE)
-    dest.swe.dat <- gsub("temp_data", "snodas_data", swe.dat.gz)
-    dest.swe.txt <- gsub("temp_data", "snodas_data", swe.txt.gz)
+    dest.swe.dat <- gsub("temp_data", out_dir, swe.dat.gz)
+    dest.swe.txt <- gsub("temp_data", out_dir, swe.txt.gz)
     dest.swe.dat <- gsub(".gz", "", dest.swe.dat)
     dest.swe.txt <- gsub(".gz", "", dest.swe.txt)
 
@@ -175,12 +175,12 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
       }
 
       # Read in and save the map
-      map[[j]] <- stars::read_stars(paste0(getwd(), "/", dest.swe.txt[i]))
+      map[[j]] <- stars::read_stars(paste0(dest.swe.txt[i]))
 
       # Write a tif object
       if (GTiff == TRUE) {
         stars::write_stars(map[[j]],
-                           paste0(getwd(), "/", out_dir, "/swe",
+                           paste0(out_dir, "/swe",
                                   date[i], ".tif"))
       }
       j <- j + 1
@@ -198,8 +198,8 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
                             recursive = TRUE)
 
     sp.dat.gz <- gsub(".txt.", ".dat.", sp.txt.gz, fixed = TRUE)
-    dest.sp.dat <- gsub("temp_data", "snodas_data", sp.dat.gz)
-    dest.sp.txt <- gsub("temp_data", "snodas_data", sp.txt.gz)
+    dest.sp.dat <- gsub("temp_data", out_dir, sp.dat.gz)
+    dest.sp.txt <- gsub("temp_data", out_dir, sp.txt.gz)
     dest.sp.dat <- gsub(".gz", "", dest.sp.dat)
     dest.sp.txt <- gsub(".gz", "", dest.sp.txt)
 
@@ -235,12 +235,12 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
       }
 
       # Read in and save the map
-      map[[j]] <- stars::read_stars(paste0(getwd(), "/", dest.sp.txt[i]))
+      map[[j]] <- stars::read_stars(paste0(dest.sp.txt[i]))
 
       # Write a tif object
       if (GTiff == TRUE) {
         stars::write_stars(map[[j]],
-                           paste0(getwd(), "/", out_dir, "/sp",
+                           paste0(out_dir, "/sp",
                                   date[i], ".tif"))
       }
       j <- j + 1
@@ -257,8 +257,8 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
                             full.names = TRUE,
                             recursive = TRUE)
     sd.dat.gz <- gsub(".txt.", ".dat.", sd.txt.gz, fixed = TRUE)
-    dest.sd.dat <- gsub("temp_data", "snodas_data", sd.dat.gz)
-    dest.sd.txt <- gsub("temp_data", "snodas_data", sd.txt.gz)
+    dest.sd.dat <- gsub("temp_data", out_dir, sd.dat.gz)
+    dest.sd.txt <- gsub("temp_data", out_dir, sd.txt.gz)
     dest.sd.dat <- gsub(".gz", "", dest.sd.dat)
     dest.sd.txt <- gsub(".gz", "", dest.sd.txt)
 
@@ -291,12 +291,12 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
                         fixed = TRUE)
       }
       # Read in and save the map
-      map[[j]] <- stars::read_stars(paste0(getwd(), "/", dest.sd.txt[i]))
+      map[[j]] <- stars::read_stars(paste0(dest.sd.txt[i]))
 
       # Write a tif object
       if (GTiff == TRUE) {
         stars::write_stars(map[[j]],
-                           paste0(getwd(), "/", out_dir, "/sd",
+                           paste0(out_dir, "/sd",
                                   date[i], ".tif"))
       }
       j <- j + 1
@@ -311,8 +311,8 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
                              full.names = TRUE,
                              recursive = TRUE)
     spt.dat.gz <- gsub(".txt.", ".dat.", spt.txt.gz, fixed = TRUE)
-    dest.spt.dat <- gsub("temp_data", "snodas_data", spt.dat.gz)
-    dest.spt.txt <- gsub("temp_data", "snodas_data", spt.txt.gz)
+    dest.spt.dat <- gsub("temp_data", out_dir, spt.dat.gz)
+    dest.spt.txt <- gsub("temp_data", out_dir, spt.txt.gz)
     dest.spt.dat <- gsub(".gz", "", dest.spt.dat)
     dest.spt.txt <- gsub(".gz", "", dest.spt.txt)
 
@@ -345,12 +345,12 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
                         fixed = TRUE)
       }
       # Read in and save the map
-      map[[j]] <- stars::read_stars(paste0(getwd(), "/", dest.spt.txt[i]))
+      map[[j]] <- stars::read_stars(paste0(dest.spt.txt[i]))
 
       # Write a tif object
       if (GTiff == TRUE) {
         stars::write_stars(map[[j]],
-                           paste0(getwd(), "/", out_dir, "/spt",
+                           paste0(out_dir, "/spt",
                                   date[i], ".tif"))
       }
       j <- j + 1
@@ -365,8 +365,8 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
                              full.names = TRUE,
                              recursive = TRUE)
     bss.dat.gz <- gsub(".txt.", ".dat.", bss.txt.gz, fixed = TRUE)
-    dest.bss.dat <- gsub("temp_data", "snodas_data", bss.dat.gz)
-    dest.bss.txt <- gsub("temp_data", "snodas_data", bss.txt.gz)
+    dest.bss.dat <- gsub("temp_data", out_dir, bss.dat.gz)
+    dest.bss.txt <- gsub("temp_data", out_dir, bss.txt.gz)
     dest.bss.dat <- gsub(".gz", "", dest.bss.dat)
     dest.bss.txt <- gsub(".gz", "", dest.bss.txt)
 
@@ -399,12 +399,12 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
                         fixed = TRUE)
       }
       # Read in and save the map
-      map[[j]] <- stars::read_stars(paste0(getwd(), "/", dest.bss.txt[i]))
+      map[[j]] <- stars::read_stars(paste0(dest.bss.txt[i]))
 
       # Write a tif object
       if (GTiff == TRUE) {
         stars::write_stars(map[[j]],
-                           paste0(getwd(), "/", out_dir, "/bss",
+                           paste0(out_dir, "/bss",
                                   date[i], ".tif"))
       }
       j <- j + 1
@@ -419,8 +419,8 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
                               full.names = TRUE,
                               recursive = TRUE)
     melt.dat.gz <- gsub(".txt.", ".dat.", melt.txt.gz, fixed = TRUE)
-    dest.melt.dat <- gsub("temp_data", "snodas_data", melt.dat.gz)
-    dest.melt.txt <- gsub("temp_data", "snodas_data", melt.txt.gz)
+    dest.melt.dat <- gsub("temp_data", out_dir, melt.dat.gz)
+    dest.melt.txt <- gsub("temp_data", out_dir, melt.txt.gz)
     dest.melt.dat <- gsub(".gz", "", dest.melt.dat)
     dest.melt.txt <- gsub(".gz", "", dest.melt.txt)
 
@@ -453,12 +453,12 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
                         fixed = TRUE)
       }
       # Read in and save the map
-      map[[j]] <- stars::read_stars(paste0(getwd(), "/", dest.melt.txt[i]))
+      map[[j]] <- stars::read_stars(paste0(dest.melt.txt[i]))
 
       # Write a tif object
       if (GTiff == TRUE) {
         stars::write_stars(map[[j]],
-                           paste0(getwd(), "/", out_dir, "/melt",
+                           paste0(out_dir, "/melt",
                                   date[i], ".tif"))
       }
       j <- j + 1
@@ -472,8 +472,8 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
                              full.names = TRUE,
                              recursive = TRUE)
     sps.dat.gz <- gsub(".txt.", ".dat.", sps.txt.gz, fixed = TRUE)
-    dest.sps.dat <- gsub("temp_data", "snodas_data", sps.dat.gz)
-    dest.sps.txt <- gsub("temp_data", "snodas_data", sps.txt.gz)
+    dest.sps.dat <- gsub("temp_data", out_dir, sps.dat.gz)
+    dest.sps.txt <- gsub("temp_data", out_dir, sps.txt.gz)
     dest.sps.dat <- gsub(".gz", "", dest.sps.dat)
     dest.sps.txt <- gsub(".gz", "", dest.sps.txt)
 
@@ -506,12 +506,12 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
                         fixed = TRUE)
       }
       # Read in and save the map
-      map[[j]] <- stars::read_stars(paste0(getwd(), "/", dest.sps.txt[i]))
+      map[[j]] <- stars::read_stars(paste0(dest.sps.txt[i]))
 
       # Write a tif object
       if (GTiff == TRUE) {
         stars::write_stars(map[[j]],
-                           paste0(getwd(), "/", out_dir, "/sps",
+                           paste0(out_dir, "/sps",
                                   date[i], ".tif"))
       }
       j <- j + 1
@@ -527,8 +527,8 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
                              full.names = TRUE,
                              recursive = TRUE)
     nsp.dat.gz <- gsub(".txt.", ".dat.", nsp.txt.gz, fixed = TRUE)
-    dest.nsp.dat <- gsub("temp_data", "snodas_data", nsp.dat.gz)
-    dest.nsp.txt <- gsub("temp_data", "snodas_data", nsp.txt.gz)
+    dest.nsp.dat <- gsub("temp_data", out_dir, nsp.dat.gz)
+    dest.nsp.txt <- gsub("temp_data", out_dir, nsp.txt.gz)
     dest.nsp.dat <- gsub(".gz", "", dest.nsp.dat)
     dest.nsp.txt <- gsub(".gz", "", dest.nsp.txt)
 
@@ -561,12 +561,12 @@ download_snodas <- function(dates = c("2010-01-01", "2017-4-1"),
                         fixed = TRUE)
       }
       # Read in and save the map
-      map[[j]] <- stars::read_stars(paste0(getwd(), "/", dest.nsp.txt[i]))
+      map[[j]] <- stars::read_stars(paste0(dest.nsp.txt[i]))
 
       # Write a tif object
       if (GTiff == TRUE) {
         stars::write_stars(map[[j]],
-                           paste0(getwd(), "/", out_dir, "/nsp",
+                           paste0(out_dir, "/nsp",
                                   date[i], ".tif"))
       }
       j <- j + 1

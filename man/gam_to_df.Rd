@@ -42,10 +42,4 @@ Generate a data frame from a generalized additive model
 \details{
 This function creates gridded product by taking in a model_data,
   raster template, a model object or model x and y's, path to prism variables,
-
-This function creates a permanent folder and downloads data
-  from the SNODAS website for the selected date(s), map type(s), and data map
-  that the user provides. This data is stored in the permanent folder.
-  The function unzips the selected data files and stores the specified
-  maps into a list of star objects.
 }
