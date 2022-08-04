@@ -41,18 +41,19 @@ This rsnodas package allows users to access, clean, visualize, and analyze data 
 \item \href{https://www.ncei.noaa.gov/products/land-based-station/global-historical-climatology-network-dailyGlobal}{\textcolor{blue}{Historical Climatology Network daily} (GHCND)} which provides access to Snow Telemetry (SNOTEL) stations
 \end{itemize}
 
-SNODAS, UA, and PRISM provide data in the form of gridded rasters for the contiguous United States. Each source can have different spatial resolutions like 800m, 1km, or 4km and multiple temporal scales of daily, monthly, annual, and 30 year normals. GHCND provides in-situ measurements, spatial point data, with different temporal scales.  This package focuses on downloading the daily maps and measurements from SNODAS, PRISM, and GHCND. UA data currently can't be downloaded in this package and must be downloaded manually after creating  and signing into an Earthdata account. Please refer to their links for more information about each data product. 
+SNODAS, UA, and PRISM provide data in the form of gridded rasters for the contiguous United States. A summary of the variables and resolution assoicated with each data source is provided in the table below. GHCND provides in-situ measurements, spatial point data, with different temporal scales.  This package focuses on downloading the daily maps and measurements from SNODAS, PRISM, and GHCND. UA data currently can't be downloaded in this package and must be downloaded manually after creating  and signing into an Earthdata account. Please refer to their links for more information about each data product. 
 
-The following table lists the data products and spatial resolution of each data source. Note that like PRISM allows users to download data at the 4km resolution for free but charge a fee for their maps at a 800m when it is their daily, monthly, or yealy data.  Their 30 year normal maps are free at the 800m.
+The following table lists the data products and spatial resolution of each data source. Note that like PRISM allows users to download data at the 4km resolution for free but charge a fee for their maps at a 800m when it is their daily, monthly, or yealy data.  Their 30 year normal (i.e. average) maps are free at the 800m resolution and are currently from 1991-2020.  These 30 year maps change from year to year and are free at the 800m resolution.
 
 \begin{center}
 \begin{tabular}{ |c|c|c| } 
     \hline
      \textbf{Data Source} & \textbf{Resolution} & \textbf{Variables available}  \\ 
      \hline
-      &  &  Snow water equivalent (SWE), Snow Depth (SnD) \\
-     SNODAS & 1 km & Snow Melt runoff (SM), Sublimation from Snow pack (SSP)  \\
-      &  &  Sublimation of blowing snow (SBS), Precipitation (Ppt),  \\
+      &  &    Snow water equivalent (SWE), Snow Depth (SnD) \\
+      &  &      Snow Melt runoff (SM), Precipitation (Ppt), \\
+     SNODAS & 1 km & Sublimation from Snow pack (SSP)  \\
+      &  &  Sublimation of blowing snow (SBS), \\
       &  &   Snow pack Temperature (SPT) \\
      \hline
       &  &  \\
@@ -61,8 +62,8 @@ The following table lists the data products and spatial resolution of each data 
      \hline
        &  &  \\
       &  & PPT, Elevation (Elev), mean dew point (TDmean)\\
-      PRISM & 4 km  & Minimum and Maximum vapor pressure deficit (VPmin and VPDmax) \\
-       & 800 m$^{\ast}$ & Minimum and Maximum Temperature (Tmin and Tmax) \\
+      PRISM & 4 km  & Min/Max vapor pressure deficit (VPmin and VPDmax) \\
+       & 800 m$^{\ast}$ & Min/Max Temperature (Tmin and Tmax) \\
         &  & total global shortwave solar radiation (SolTol) \\
      \hline
         &  & \\
@@ -71,6 +72,16 @@ The following table lists the data products and spatial resolution of each data 
      \hline
 \end{tabular}\\
 \end{center}
+
+This vignette uses functions from \texttt{tidyverse}, \texttt{ggplot2}, \texttt{sf}, and the \texttt{stars} package and will be loaded now.
+
+```{r packages, eval = FALSE, echo = TRUE, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(sf)
+library(stars)
+library(ggplot2)
+'%>%' <- magrittr::'%>%'
+```
 
 ## Installation
 rsnodas is available on GitHub and can be installed with devtools:
@@ -83,7 +94,7 @@ install_github("lschneider93/rsnodas")
 
 <!-- \url{https://www.usu.edu/utahsnowload/}. -->
 
-The outline will be Downloading SNODAS, SNOTEL, and PRISM.  After downloading all of those sources of data, the process of creating a raster of predictions and calculating station density will be shown.  The blending of SNODAS and the Generalized Additive model can then be explored.
+The vignette will first proceed with a demonstration of how to download SNODAS, SNOTEL, and PRISM data.  After downloading all of those sources of data, the vignette will show the process of creating a raster of predictions and calculating station density. The blending of SNODAS and a Generalized Additive model can then be explored.
 <!-- \begin{enumerate} -->
 <!--   \item Download SNODAS -->
 <!--   \item Download SNOTEL and PRISM -->
@@ -97,7 +108,7 @@ The outline will be Downloading SNODAS, SNOTEL, and PRISM.  After downloading al
 # Downloading SNODAS, PRISM, and SNOTEL data
 
 ## SNODAS
-The function `download_snodas` allows us to choose the variables we want to download. Note that the dates inputted in this function need to be in 'YYYY-MM-DD' or 'YYYY-M-D' format. The function `format_date` is included in this package to allow users capabilities of easily creating character vectors with dates in the needed format. `format_date` function can be applied inside of the `download_snodas` for mass downloading.  The following example shows how to download snow water equivalent for the masked area of the US into a folder called snodas_data in our working directory.
+The function `download_snodas` allows us to choose the variables we want to download. Note that the dates inputted in this function need to be in 'YYYY-MM-DD' or 'YYYY-M-D' format. The function `format_date` allows users to easily create character vectors with dates in the needed format. `format_date` function can be applied inside of the `download_snodas` for mass downloading.  The following example shows how to download snow water equivalent for the masked area of the US into a folder called 'snodas_data' in our working directory.
 
 
 ```{r snodas, echo = TRUE, eval = TRUE}
@@ -143,17 +154,16 @@ ggplot() +
 
 The PRISM climate group has been provided climate maps since 1895 for the Precipitation (PPT), Minimum and maximum temperature (Tmin and Tmax), Minimum and maximum vapor pressure deficit (vpdmin and vpdmax), mean dew point (tdmean), Elevation (Elev), and total global shortwave solar radiation.
 
-Most of this data from PRISM can be downloaded by utilizing the R package, \texttt{prism}, and more examples and information is available at \href{https://cran.r-project.org/web/packages/prism/vignettes/prism.html}{\textcolor{blue}{this link}}. The difference is that they have three separate functions to download daily, monthly, and yearly data and store them in different file paths to keep them organized.
+Most of this data from PRISM can be downloaded by utilizing the R package, \texttt{prism}, and more examples and information is available at \href{https://cran.r-project.org/web/packages/prism/vignettes/prism.html}{\textcolor{blue}{this link}}. This package has three separate functions to download daily, monthly, and yearly data and store them in different file paths to keep them organized.
 
-In comparison, `download_prism` was created because it is one function that can download daily, monthly, and yearly PRISM climate data and stores all the data files in one directory. This will be optimal for decreasing time and effort later to create a model for prediction. The alternative using \texttt{prism} and moving all the data files into one directory.
+In comparison, we've created the `download_prism` function to seamlessly download daily, monthly, and yearly PRISM climate data and stores all the data files in one directory. This will be optimal for decreasing time and effort later to create a model for prediction. The alternatives are to manually or by use \texttt{prism} functions to download PRISM data and move all PRISM files into one directory. Currently, `download_prism` is limited to only download daily, monthly, or yearly data and can't be used to download PRISM's 30 year normal maps.
 
-The follow example will download monthly precipitation from December 2021 until Feb 2022 and store in the folder called 'prism_data' in your working directory.
-
+The follow example will download monthly precipitation from January 2021 until March 2021 and store in the folder called 'prism_data' in your working directory.
 
 ```{r prism2, eval = TRUE, echo = TRUE}
-# Example of downloading 4km monthly precipitation maps from Dec. 2013 - Feb. 2014 
+# Example of downloading 4km monthly precipitation maps from Jan. 2021 - March 2021 
 download_prism(sp_res = "4km", data = c("ppt"), t_res = "monthly",
-               start_date = as.Date("2021-03-01"), end_date = as.Date("2021-03-15"),  
+               start_date = as.Date("2021-01-01"), end_date = as.Date("2021-03-15"),  
                out_dir = paste0(getwd(), "/prism"))
 
 ```
@@ -161,12 +171,12 @@ download_prism(sp_res = "4km", data = c("ppt"), t_res = "monthly",
 Note that all PRISM files need to be in the same location in order to use the function `gam_to_df` in a later section.  
 
 ## Download SNOTEL 
-The `data-raw` folder contains an script titled `DATASET` that shows how to download the all SNOTEL data by using `download_all_ghcnd_stations`.  Note that there is more than 30 gigabytes of data and this will take time to download. The functions `download_all_ghcnd_stations`, `get_station_data`, and `get_state_data` come from a currently private \texttt{snowload2} package (authors Jadon Wagstaff and Brennan Bean) and is replicated here with the permission from the authors. `get_station_data` and `get_state_data` are for the purpose of sifting through all the data to get the stations in a specific state.  These functions were used to create the dataset `april_1_snotel_data`. 
+The `data-raw` folder contains an script titled `DATASET` that shows how to download the all SNOTEL data by using `download_all_ghcnd_stations`.  Note that there is more than 30 gigabytes of data and this will take time to download. The functions `download_all_ghcnd_stations`, `get_station_data`, and `get_state_data` come from a currently private \texttt{snowload2} package (authors Jadon Wagstaff and Brennan Bean) and is replicated here with the permission from the authors. `get_station_data` and `get_state_data` are for the purpose of sifting through all the data to get the stations in a specific state.  These functions were used to create the dataset `april_1_snotel_data` which is included as a dataset internal to the \texttt{rsnodas} package
 
 ```{r snotel, eval = FALSE, echo = TRUE}
 # Code to download all stations in your working directory. A file path could 
 #   have been used instead of ".".
-### This code downloads 30 GB of data and will take time to download
+### This code downloads 30 GB of data and will take hour to download
 download_all_ghcnd_stations(directory = ".")
 
 ```
@@ -179,9 +189,9 @@ snotel_ut_2021 <- snotel_ut[snotel_ut$DATE == "2021-04-01", ]
 
 # GAM to Data frame to Raster
 
-This section will use the point data provided by SNOTEL sites and climate variables from PRISM gridded products to create estimates.  The process of creating gridded raster estimates will be demonstrated in a three-step process. The first step is to create a data frame with all the Longitude and Latitude with the corresponding PRISM climate information.  This is accomplished by using the `gam_to_df` function. This function will only look in one directory and it is vital that all PRISM data files are in one directory. 
+This section will use the point data provided by SNOTEL sites and climate variable maps from PRISM to create estimates.  The process of creating gridded raster estimates will be demonstrated in a three-step process. The first step is to create a data frame with the Longitude, Latitude, and extract PRISM climate variable information for every grid cell in the area of interest.  This is accomplished by using the `gam_to_df` function. This function only looks in one directory and it is vital that all PRISM data files are in one directory. 
 
-This example shows creating a data frame with the Long/Lat of Utah and the variables of monthly precipitation data from March 2022, elevation, and slope. 
+This example shows creating a data frame with the Longitude, Latitude, and monthly precipitation values from March 2021 in Utah.  
 
 ```{r gam, eval = TRUE, echo = TRUE}
 # creation of a data frame with all the PRISM variables of precipitation 
@@ -194,9 +204,9 @@ gam_2021 <- gam_to_df(model_data = snotel_ut_2021,
 head(gam_2021, 5)
 ```
 
-The second step is to build a model with the SNOTEL station. This could be any model that can have the `predict` function from the \texttt{stats} package applied afterwards. A commmon model used for spatial data is a Generalized Additive Model (GAM).  This is because GAMs account for non-linear effects and can use splines on the sphere (SOS) which account for the spherical shape of the earth. 
+The second step is to build a model with the SNOTEL stations data. Any model that can use the `predict` function will work here. A commmon model used for spatial data is a Generalized Additive Model (GAM). This is because GAMs account for non-linear effects and can use splines on the sphere (SOS) which account for the spherical shape of the earth. GAMs were calculated by using the function `gam` from the package \texttt{mgcv} and more information is available at this \href{https://cran.r-project.org/web/packages/mgcv/mgcv.pdf}{\textcolor{blue}{link}.}
 
-The following code creates a GAM with the SNOTEL station information using March 2022 PRISM monthly precipitation.
+The following code creates a GAM with the SNOTEL station information using March 2021 PRISM monthly precipitation.
 
 ```{r gam2, eval = TRUE, echo = TRUE}
 # This allows users to explore using different models with the monthly precipitation 2021. 
@@ -214,10 +224,9 @@ model <- mgcv::gam(data = snotel_ut_2021,
 #                 method = "REML")
 ```
 
-
 The final step predict the output with the variables throughout the area of interest and create a gridded output of predictions.  This is accomplished by using the `df_to_raster` that takes the previously created model and data frame to create a raster.  
 
-Below is an example of creating a raster predicting SWE using the previous model using elevation, slope and precipitation from March and the data frame with all the points in the area of Utah.
+Below is an example of creating a raster predicting snow water equivalent (SWE) using the previous model using elevation, slope and precipitation from March and the data frame with all the points in the area of Utah.
 
 ```{r gam3, eval = TRUE, echo = TRUE, fig.dim=c(4.75, 4.35), fig.align='center'}
 # After creating a model, we can make predictions of SWE with the information available.
@@ -237,9 +246,9 @@ ggplot() +
 
 ## Station Density
 
-We have created a map of SWE estimates throughout Utah using point data and climate information. There are already products, like SNODAS, that estimate SWE throughout the US or global information.  The hope is using local information (SNOTEL) to improve the global information (SNODAS). By combining these maps of estimate should reduce the variance of the predictions. In order to blend these maps together, we need to blend based on some criteria. This blending allows our predictions to not rely solely on one prediction.  
+We have created a map of SWE estimates throughout Utah using point data and climate information. There are already products, like SNODAS, that estimate SWE throughout the US. SNODAS currently provides the best SWE estimates but is known to struggle predicting in mountainous regions. This map of SWE estimates created using SNOTEL stations has the potential to provide better information in mountain regions. The final map generated by blending SNODAS and the SNOTEL map would not rely solely on one prediction but on SNOTEL information and SNODAS. The goal of blending these maps is to use local information from SNOTEL sites to improve the global predictions that SNODAS provides. The combining of these maps should reduce the variance of the error of the predictions. In order to blend these maps together, we need to blend based on some criteria.  This vignette will blend these two maps based on station density.  
 
-We are going to  blend and weight each map by observation or station density. This uses the `points_to_density_stars` function.  The `sigma` argument will extend the distance and is in meters while the gridded product is in kilometers.  Changing the `max_weight` argument gives more weight to the Generalized Additive model or the model from the in-situ measurements. The max weight needs to be within the range of 0-1. This weight is a percentage and don't want negative percentages or percentages over 100.   
+We are going to blend and weight each map by observation or station density. This uses the  `points_to_density_stars` function to produce a raster of weights.  The `sigma` argument will influence the kernel density calculation to include a larger or smaller distance.  Changing the `max_weight` argument gives more weight to the Generalized Additive model or the model from the in-situ measurements. The max weight needs to be within the range of 0-1. This weight is a percentage and won't allow negative percentages or percentages over 100.   
 
 This creates a density map of all the SNOTEL stations in 2022.
 ```{r density, eval = TRUE, echo = TRUE, fig.dim=c(4.35, 4.15), fig.align='center'}
@@ -260,11 +269,11 @@ ggplot() +
         text = element_text(size = 12))
 
 ```
-It is important to note that the Station density follows the Wasatch Mountains.  The data collected from SNOTEL stations are important to predicting how much water is contained in the Snowpacks for flood forecasting and water management. Therefore, it is important that we understand how much water is in the mountain snowpacks.
+It is important to note that the station density follows the Wasatch Mountains.  The data collected from SNOTEL stations are important to predicting how much water is contained in the Snowpacks for flood forecasting and water management. Therefore, it is important that we understand how much water is in the mountain snowpacks.
 
 ## Ensemble SNODAS and GAM predictions
 
-Lastly, the `blend_raster` function with blend the rasters together with the weights associated. We are going to use all the previous maps to create a final prediction or estimate of SWE. This process can be applied to multiple types of spatial problems. 
+Lastly, the `blend_raster` function will blend the rasters together with the weights associated. This function could be used to apply weight to any two raster and can be applied to multiple types of spatial problems. It isn't necessary to use the GAM for the land-based predictions if that doesn't apply to your problem. Currently, this function only allows the blending of two maps together. We are going to use all the previous maps to create a final prediction or estimate of SWE.
 
 This is blending the SNODAS and GAM model based on the SNOTEL station density.
 
@@ -273,10 +282,11 @@ comb_map <- blend_raster(raster_sate = snodas_ut_2021,
                          raster_land = gam_rast,
                          weights = dens_2021)
 
+names(comb_map) <- "Value"
 ggplot() + 
   stars::geom_stars(data = comb_map) +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
-  ggtitle("2022 Ensemble Map") + 
+  ggtitle("2021 Ensemble Map") + 
   scale_fill_viridis_c(option = "B") + 
   theme(plot.title = element_text(hjust = 0.5, size = 18),
         text = element_text(size = 12))
@@ -285,4 +295,4 @@ ggplot() +
 
 # Conclusion
 
-This package allows users to download, store, and access multiple types of information available from SNODAS, PRISM, and SNOTEL. These data sources can explore multiple types of modeling techniques for spatial data with the potential to improve current gridded products. 
+This package allows users to download, store, and access multiple types of information available from SNODAS, PRISM, and SNOTEL. These data sources can explore multiple types of modeling techniques for spatial data with the objective to provide local improvements to currently availabe national gridded climate and snow products. 

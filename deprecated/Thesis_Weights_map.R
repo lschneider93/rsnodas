@@ -11,7 +11,7 @@ g <- ggplot() +
 
 g
 
-ggsave(filename = paste0("Station Density weights for 2015", ".png"),
+ggsave(filename = paste0("Thesis Density weights for 2015", ".png"),
        plot = g,
        width = 8.46,
        height = 8.42,

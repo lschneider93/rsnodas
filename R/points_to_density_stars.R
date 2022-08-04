@@ -43,6 +43,11 @@ points_to_density_stars <- function(sp_points,# = april_df_ghcnd[[17]],
   # flat_crs =
   #   "+proj=utm + zone=12 + datum=WGS84"
 
+  # Testing to ensure max weight is between 0 and 1.
+  if ((max_weight < 0) | (max_weight > 1)) {
+    stop("max weight can't be less than 0 or greater than 1")
+  }
+
   # Get the Lon and Lat
   LON <- coords[1]
   LAT <- coords[2]

@@ -1,6 +1,6 @@
 # t <- stars::st_extract(temp, april_1_snotel_2003)
-# april_1_snotel <- april_1_snotel[(april_1_snotel$DATE > "2003-04-01") &
-#                           (april_1_snotel$DATE < "2022-04-01"), ]
+april_1_snotel_2003 <- april_1_snotel[(april_1_snotel$DATE > "2003-04-01") &
+                          (april_1_snotel$DATE < "2022-05-01"), ]
 
 # colnames(adata)
 # adata <- adata[, c(1, 2, 8, 9, 10, 11:30)]
@@ -109,14 +109,14 @@ for (i in 1:(length(years))) {
   # sd_CV_S_G_UA_100[i] <- sd((april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
   #                            april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_UA_100)
 
-  sd_UA[i] <- sd((april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
-                   april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$UA_VALUE))
+  # sd_UA[i] <- sd((april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+  #                  april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$UA_VALUE))
   sd_S[i] <- sd((april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                   april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$SNODAS_VALUE))
   # sd_F_G[i] <- sd((april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
   #                   april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$FULL_GAM_VALUE)
-  sd_F_G_S[i] <- sd((april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
-                      april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$FULL_GAM_SNODAS_VALUE))
+  # sd_F_G_S[i] <- sd((april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+  #                     april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$FULL_GAM_SNODAS_VALUE))
   # sd_F_G_S_UA[i] <- sd((april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
   #                        april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$FULL_COMB_VALUE)
 
@@ -190,6 +190,7 @@ g <- ggplot(ldf, aes(y = residual_value, x = years, color = model_type)) +
   geom_line(size = .9) +
   theme(plot.title = element_text(hjust = 0.5, size = 26),
         text = element_text(size = 20)) +
+  ylab("Residual Value") +
   # scale_color_brewer(palette = "Dark2") +
   scale_color_manual(values = c("royalblue", "tan4",
                                 # "lightsalmon2",
@@ -241,6 +242,7 @@ g <- ggplot(ldf, aes(y = residual_value, x = years, color = model_type)) +
         text = element_text(size = 20)) +
   ggtitle("Time Series of SD of Errors") +
   ylab("Residual Value") +
+  # ylim(c(-25, 210)) +
   scale_color_manual(values = c("royalblue", "tan4",
                                 #"lightsalmon2",
                                 "gray0", "green4")) # +
@@ -258,14 +260,14 @@ ggsave(filename = paste0("TimeSeries_Median_comparison_100.png"),
 
 ##### Trying to combine and compare the GAM and SNODAS
 for (i in 1:(length(years))) {
-  df <- as.data.frame(cbind(april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
-                              april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$SNODAS_VALUE,
-                            april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
-                              april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_RASTER_PREDS,
+  df <- as.data.frame(cbind((april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                              april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$SNODAS_VALUE),
+                            (april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                              april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_RASTER_PREDS),
                             # april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                             #   april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$UA_VALUE,
-                            april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
-                              april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_100,
+                            (april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
+                              april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_100)
                             # april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                             #   april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_WEIGHTED_RASTER_PREDS,
                             # april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
@@ -288,9 +290,10 @@ for (i in 1:(length(years))) {
     #scale_color_manual(values = c("black", "blue")) +
     theme(plot.title = element_text(hjust = 0.5, size = 24),
           axis.text = element_text(size = 20),
+          # plot.margin = unit(c(.5,.5,.5,.5), 'cm'),
           axis.title = element_text(size = 20)) +
     geom_hline(yintercept = 0) +
-    ylim(c(-500, 750)) +
+    ylim(c(-850, 850)) +
     coord_flip()
   g
 
@@ -357,7 +360,7 @@ ggsave(filename = paste0("Thesis Time Series of Median of Errors2", ".png"),
 )
 
 # Standard Deviations Time Series plots
-df <- as.data.frame(cbind(years[-19],
+df <- as.data.frame(cbind(years,
                           sd_CV_GR,
                           sd_CV_S_G_50,
                           # median_CV_S_G_60,

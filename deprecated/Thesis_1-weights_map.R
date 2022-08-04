@@ -11,7 +11,7 @@ g <- ggplot() +
         text = element_text(size = 24))
 
 g
-ggsave(filename = paste0("1-weights density", ".png"),
+ggsave(filename = paste0("Thesis 1-weights density", ".png"),
        plot = g,
        width = 8.46,
        height = 8.42,
