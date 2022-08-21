@@ -26,7 +26,7 @@ yearly_brick <- stars::st_warp(yearly_brick,
 # s_ut <- sf::st_crop(yearly_brick, ut_map)
 #
 # #
-names(yearly_brick) <- "Daymet_Pred"
+names(yearly_brick) <- "Value"
 g <- ggplot() +
   stars::geom_stars(data = yearly_brick) +
   # geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
@@ -37,12 +37,12 @@ g <- ggplot() +
 
 g
 #
-# ggsave(filename = paste0("Thesis Daymet map for 2015", ".png"),
-#        plot = g,
-#        width = 8.46,
-#        height = 8.42,
-#        path = paste0(getwd(), "/figures")
-#        # width = 8.07,
-#        # height = 6.87
-# )
+ggsave(filename = paste0("Thesis Daymet map for 2015", ".png"),
+       plot = g,
+       width = 8.46,
+       height = 8.42,
+       path = paste0(getwd(), "/figures")
+       # width = 8.07,
+       # height = 6.87
+)
 
