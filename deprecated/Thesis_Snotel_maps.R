@@ -39,7 +39,7 @@ ggsave(filename = paste0("SNOTEL stations", ".png"),
        plot = g,
        width = 8.46,
        height = 8.42,
-       path = paste0(getwd(), "/figures")
+       path = paste0(getwd())
 )
 
 

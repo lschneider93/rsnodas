@@ -25,9 +25,11 @@ header-includes:
 # - https://bookdown.org/yihui/rmarkdown-cookbook/hide-one.html
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE,
                       message = FALSE, results = TRUE)
-'%>%' <- magrittr::'%>%'
+
 library(rsnodas)
 library(ggplot2)
+# get the pipe function from magrittr
+"%>%" <- magrittr::"%>%"
 ```
 
 
@@ -80,7 +82,7 @@ library(tidyverse)
 library(sf)
 library(stars)
 library(ggplot2)
-'%>%' <- magrittr::'%>%'
+
 ```
 
 ## Installation
@@ -127,9 +129,6 @@ snodas_2021 <- download_snodas(dates = format_dates(day = 1,
 After downloading SNODAS, you can crop it to the area or state of interest.  These next portion of code gets a shape file of Utah from the \texttt{maps} package, crops the SNODAS map to the state of Utah, and creates a visual by using \texttt{ggplot2}.
 
 ```{r snodas2, echo = TRUE, eval = TRUE, fig.dim=c(4.35, 4.15), fig.align='center'}
-# get the pipe function from magrittr
-"%>%" <- magrittr::"%>%"
-
 # Get an shape of utah from the maps package
 ut_map <- maps::map("state", plot = FALSE, fill = TRUE) %>%
   sf::st_as_sf() %>%
@@ -162,7 +161,7 @@ The follow example will download monthly precipitation from January 2021 until M
 
 ```{r prism2, eval = TRUE, echo = TRUE}
 # Example of downloading 4km monthly precipitation maps from Jan. 2021 - March 2021 
-download_prism(sp_res = "4km", data = c("ppt"), t_res = "monthly",
+download_prism(sp_res = "4km", data = "ppt", t_res = "monthly",
                start_date = as.Date("2021-01-01"), end_date = as.Date("2021-03-15"),  
                out_dir = paste0(getwd(), "/prism"))
 
@@ -198,8 +197,8 @@ This example shows creating a data frame with the Longitude, Latitude, and month
 gam_2021 <- gam_to_df(model_data = snotel_ut_2021,
                       raster_template = snodas_ut_2021,
                       path_to_prism = paste0(getwd(), "/prism"),
-                      model_x <- c("ppt_2021_03"),
-                      model_y <- c("VALUE"),
+                      model_x <- "ppt_2021_03",
+                      model_y <- "VALUE",
                       coords = c("LONGITUDE", "LATITUDE"))
 head(gam_2021, 5)
 ```
@@ -215,13 +214,11 @@ model <- mgcv::gam(data = snotel_ut_2021,
                   s(ppt_2021_03),
                 method = "REML")
 
-# This is another example of a model that uses elevation, slope and precipitation.
+# This is another example of a random forest model that uses elevation, slope and precipitation.
 # NOTE: In order to run this You MUST download elevation and store it in the same folder.
-# model <- mgcv::gam(data = snotel_ut_2021,
-#                    VALUE ~ s(LONGITUDE, LATITUDE, bs = "sos", k = 25) +                          
-#                   s(ppt_2021_02) + s(slope) + 
-#                   s(elevation),
-#                 method = "REML")
+# rf_model <- randomForest::randomForest(data = train.data,
+#                             VALUE ~ LONGITUDE + LATITUDE + ppt_normal_annual +
+#                             elevation + slope, method = "REML")
 ```
 
 The final step predict the output with the variables throughout the area of interest and create a gridded output of predictions.  This is accomplished by using the `df_to_raster` that takes the previously created model and data frame to create a raster.  
@@ -264,7 +261,7 @@ ggplot() +
   stars::geom_stars(data = dens_2021) +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
   ggtitle("2021 Station Density") + 
-  scale_fill_viridis_c(option = "B") + 
+  scale_fill_viridis_c(option = "D") + 
   theme(plot.title = element_text(hjust = 0.5, size = 18),
         text = element_text(size = 12))
 

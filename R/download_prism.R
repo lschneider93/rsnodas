@@ -18,10 +18,6 @@
 #'  for the selected date(s), map type(s), and data map that the user provides.
 #'  The downloaded data is stored in the permanent folder.
 #'
-# #' @importFrom utils download.file untar
-# #' @importFrom R.utils gunzip
-# #' @importFrom lubridate day month year
-# #' @importFrom stars read_stars
 #'
 #' @export
 # Modified May 2022 by Logan Schneider
@@ -44,7 +40,7 @@ download_prism <- function(sp_res = "4km", # or 800m
   for (i in 1:length(data)) {
     if (!(data[i] %in% c("ppt", "tmin", "tmax", "tmean",
                          "tdmean", "vpdmin","vpdmax"))) {
-      stop("all data argument(s) must be a valid data option")
+      stop("all data argument(s) must be a valid data option. See examples")
     }
   }
 
@@ -78,7 +74,9 @@ download_prism <- function(sp_res = "4km", # or 800m
     years <- gsub("-", "", substring(tdate, 1, 4))
     tdate <- unique(gsub("-", "", substring(tdate, 1, 4)))
     time_resolution <- "year"
-  }
+
+  } else (stop("all data argument(s) must be a valid data option. See example"))
+
 
   tsource <- c()
   destination <- c()
