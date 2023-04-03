@@ -48,8 +48,6 @@ download_prism <- function(sp_res = "4km", # or 800m
     }
   }
 
-  years <- gsub("-", "", substring(tdate, 1, 4))
-
   # If no end_date, then the start date is the end date as well.
   if (missing(end_date)) {end_date <- start_date}
 
@@ -63,11 +61,14 @@ download_prism <- function(sp_res = "4km", # or 800m
   # For loops depend on time resolution
   if (t_res == "daily") {
     tdate <- seq(start_date, end_date, by = "day")
+
+    years <- gsub("-", "", substring(tdate, 1, 4))
     tdate <- gsub("-", "", tdate)
     time_resolution <- "day"
 
   } else if(t_res == "monthly") {
     tdate <- seq(start_date, end_date, by = "month")
+    years <- gsub("-", "", substring(tdate, 1, 4))
 
     # remove the day argument and get rid of the "-" and return a 6 character
     tdate <- gsub("-", "", substring(tdate, 1, 7))
@@ -75,6 +76,7 @@ download_prism <- function(sp_res = "4km", # or 800m
 
   } else if(t_res == "yearly") {
     tdate <- seq(start_date, end_date, by = "year")
+    years <- gsub("-", "", substring(tdate, 1, 4))
     tdate <- unique(gsub("-", "", substring(tdate, 1, 4)))
     time_resolution <- "year"
   }
@@ -117,3 +119,11 @@ download_prism <- function(sp_res = "4km", # or 800m
     Sys.sleep(1)
   }
 }
+
+
+# download_prism(sp_res = "4km",
+#                data = c("ppt"),
+#                t_res = "monthly",
+#                start_date = as.Date("2021-01-01"),
+#                end_date = as.Date("2021-03-15"),
+#                out_dir = paste0(getwd(), "/prism"))

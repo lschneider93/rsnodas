@@ -177,7 +177,7 @@ The `data-raw` folder contains an script titled `DATASET` that shows how to down
 # Code to download all stations in your working directory. A file path could 
 #   have been used instead of ".".
 ### This code downloads 30 GB of data and will take hour to download
-download_all_ghcnd_stations(directory = ".")
+# download_all_ghcnd_stations(directory = ".")
 
 ```
 
@@ -295,4 +295,4 @@ ggplot() +
 
 # Conclusion
 
-This package allows users to download, store, and access multiple types of information available from SNODAS, PRISM, and SNOTEL. These data sources can explore multiple types of modeling techniques for spatial data with the objective to provide local improvements to currently availabe national gridded climate and snow products. 
+This package allows users to download, store, and access multiple types of information available from SNODAS, PRISM, and SNOTEL. These data sources can explore multiple types of modeling techniques for spatial data with the objective to provide local improvements to currently available national gridded climate and snow products. 
