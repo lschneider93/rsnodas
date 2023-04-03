@@ -4,7 +4,6 @@ set.seed(123)
 #############              Creating SNODAS and UA MAPS             #############
 ################################################################################
 april_1_snotel <- rsnodas::april_1_snotel_data
-# april_1_snotel <- april_1_snotel_data
 
 # Download Snodas
 snodas_april_maps <- download_snodas(dates = format_dates(day = 1,
@@ -36,7 +35,7 @@ for (i in 1:length(snodas_april_maps)) {
 }
 
 # read in the University of Arizona
-ua_april_maps <- stars::read_stars("deprecated/ua_ut_april1.tif")
+ua_april_maps <- stars::read_stars("data-raw/ua_ut_april1.tif")
 
 # split(ua_april_maps)
 # plot(ua_april_maps)
@@ -86,36 +85,6 @@ for (i in 1:length(snodas_april_maps)) {
                                   raster_template = snodas_april_maps[[i]])
 }
 
-
-################################################################################
-#############       Creating Random Forest for each year           #############
-################################################################################
-
-# Vector of dates
-dates <- as.Date(format_dates(day = 1, month = 4, year = 2004:2022))
-rf_raster <- vector("list", length(snodas_april_maps))
-
-set.seed(1234)
-for (i in 1:length(snodas_april_maps)) {
-  g_df <- gam_to_df(model_data = april_1_snotel[april_1_snotel$DATE == dates[i], ],
-                    model_x = c("ppt_normal_annual", "elevation",
-                                "slope", "aspect"),
-                    model_y = c("VALUE"),
-                    raster_template = snodas_april_maps[[i]],
-                    coords = c("LONGITUDE", "LATITUDE"),
-                    path_to_prism = "/Users/loganschneider/Desktop/PRISM")
-
-  rf_model <- randomForest::randomForest(data = train.data,
-                                         VALUE ~ LONGITUDE + LATITUDE + ppt_normal_annual +
-                                           elevation + slope +
-                                           aspect, method = "REML")
-
-  rf_raster[[i]] <- df_to_raster(model = rf_model,
-                                  data_fram = g_df,
-                                  raster_template = snodas_april_maps[[i]])
-
-}
-
 ################################################################################
 #############           Creating station density maps              #############
 ################################################################################
@@ -161,8 +130,6 @@ for (i in 1:(length(snodas_april_maps))) {
 
   # Create a vector that will be the same length
   predictions <- numeric()
-  predictions2 <- numeric()
-  predictions3 <- numeric()
   randomized <- sample(x)
 
   #### Split the station data into 10 parts.  We are going to predict on 10%
@@ -194,39 +161,19 @@ for (i in 1:(length(snodas_april_maps))) {
                          s(elevation),
                        method = "REML")
 
-    model2 <- randomForest::randomForest(data = train.data,
-                       VALUE ~ LATITUDE + LONGITUDE +
-                         ppt_normal_annual + slope + aspect +
-                         elevation)
-
-    model3 <- lm(data = train.data,
-                       VALUE ~ log(elevation))
-
     # Make predictions and compute the R2, RMSE and MAE
     # predictions <- model %>% predict(test.data)
     prediction <- predict(model, newdata = test.data)
     predictions <- c(predictions, prediction)
-
-    prediction2 <- predict(model2, newdata = test.data)
-    predictions2 <- c(predictions2, prediction2)
-
-    prediction3 <- predict(model3, newdata = test.data)
-    predictions3 <- c(predictions3, prediction3)
     # j = j + 1
   }
 
   # organize the predictions to be back in the correct order
   april_1_snotel[tf_vector, "CV_GAM_MODEL"] <- predictions[order(randomized)]
-  april_1_snotel[tf_vector, "CV_RF_MODEL"] <- predictions2[order(randomized)]
-  april_1_snotel[tf_vector, "CV_LM_MODEL"] <- predictions3[order(randomized)]
 
   #### Replacing all negative values with 0.
   april_1_snotel[tf_vector, "CV_GAM_MODEL"] <- ifelse(april_1_snotel[tf_vector, "CV_GAM_MODEL"] < 0,
-                                                      0, april_1_snotel[tf_vector, "CV_GAM_MODEL"])
-  april_1_snotel[tf_vector, "CV_RF_MODEL"] <- ifelse(april_1_snotel[tf_vector, "CV_RF_MODEL"] < 0,
-                                                      0, april_1_snotel[tf_vector, "CV_RF_MODEL"])
-  april_1_snotel[tf_vector, "CV_LM_MODEL"] <- ifelse(april_1_snotel[tf_vector, "CV_LM_MODEL"] < 0,
-                                                      0, april_1_snotel[tf_vector, "CV_LM_MODEL"])
+                                            0, april_1_snotel[tf_vector, "CV_GAM_MODEL"])
 }
 
 ################################################################################
@@ -234,9 +181,6 @@ for (i in 1:(length(snodas_april_maps))) {
 ################################################################################
 
 april_1_snotel$CV_GAM_RASTER_PREDS <- 99999
-april_1_snotel$CV_RF_RASTER_PREDS <- 99999
-april_1_snotel$CV_LM_RASTER_PREDS <- 99999
-april_1_snotel$CV_SVM_RASTER_PREDS <- 99999
 
 april_1_snotel[tf_vector, "CV_GAM_SNODAS_50_50"] <- 99999
 april_1_snotel[tf_vector, "CV_GAM_SNODAS_60_40"] <- 99999
@@ -245,7 +189,13 @@ april_1_snotel[tf_vector, "CV_GAM_SNODAS_80_20"] <- 99999
 april_1_snotel[tf_vector, "CV_GAM_SNODAS_90_10"] <- 99999
 april_1_snotel[tf_vector, "CV_GAM_SNODAS_100"] <- 99999
 
-set.seed(1234)
+# april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_50_50"] <- 99999
+# april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_60_40"] <- 99999
+# april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_70_30"] <- 99999
+# april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_80_20"] <- 99999
+# april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_90_10"] <- 99999
+# april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_100"] <- 99999
+# set.seed(1234)
 
 # Cross-Validation for all the years
 for (i in 1:(length(snodas_april_maps))) {
@@ -258,13 +208,17 @@ for (i in 1:(length(snodas_april_maps))) {
 
   # Create a vector that will be the same length
   predictions <- numeric()
-  rf_predictions <- numeric()
-
+  predictions2 <- numeric()
   predictions3 <- numeric()
+  predictions4 <- numeric()
   predictions5 <- numeric()
+  predictions6 <- numeric()
   predictions7 <- numeric()
+  predictions8 <- numeric()
   predictions9 <- numeric()
+  predictions10 <- numeric()
   predictions11 <- numeric()
+  predictions12 <- numeric()
   predictions13 <- numeric()
   randomized <- sample(x)
 
@@ -297,11 +251,10 @@ for (i in 1:(length(snodas_april_maps))) {
                           coords = c("LONGITUDE", "LATITUDE"),
                           path_to_prism = "/Users/loganschneider/Desktop/PRISM")
 
-    # Creating the GAM Model
     gam_model <- mgcv::gam(data = train.data,
-                           VALUE ~ s(LONGITUDE, LATITUDE, bs = "sos", k = 25) +
-                             s(ppt_normal_annual) + s(elevation) + s(slope) +
-                             s(aspect), method = "REML")
+                       VALUE ~ s(LONGITUDE, LATITUDE, bs = "sos", k = 25) +
+                         s(ppt_normal_annual) + s(elevation) + s(slope) +
+                         s(aspect), method = "REML")
 
     test_gam <- df_to_raster(model = gam_model,
                              data_fram = test_df,
@@ -310,26 +263,10 @@ for (i in 1:(length(snodas_april_maps))) {
     test.data <- sf::st_as_sf(test.data, coords = c("LONGITUDE", "LATITUDE"),
                               crs = sf::st_crs(snodas_april_maps[[i]]))
 
-    # Creating the Random Forest Model
-    rf_model <- randomForest::randomForest(data = train.data,
-                           VALUE ~ LONGITUDE + LATITUDE + ppt_normal_annual +
-                             elevation + slope +
-                             aspect, method = "REML")
-
-    test_rf <- df_to_raster(model = rf_model,
-                             data_fram = test_df,
-                             raster_template = snodas_april_maps[[1]])
-
-    test.data2 <- sf::st_as_sf(test.data, coords = c("LONGITUDE", "LATITUDE"),
-                              crs = sf::st_crs(snodas_april_maps[[i]]))
-
 
     # Extract at the test data points (these are the predictions)
     prediction <- stars::st_extract(test_gam, test.data)$MODEL_PRED
     predictions <- c(predictions, prediction)
-
-    rf_prediction <- stars::st_extract(test_rf, test.data2)$MODEL_PRED
-    rf_predictions <- c(rf_predictions, rf_prediction)
 
     # Create the density plot
     pd_star <- points_to_density_stars(sp_points = train.data,
@@ -389,21 +326,41 @@ for (i in 1:(length(snodas_april_maps))) {
     comb_map2 <- ((pd_star) * test_gam) +
       ((1 - pd_star) * (snodas_april_maps[[i]]))
 
-    # SNODAS_GAM_60_40
+    # SNODAS_GAM_UA_60_40
+    # comb_map3 <- ((pd_star2) * test_gam) +
+    #   ((1 - pd_star2) * (comb_ua_snodas_maps[[i]]))
+
+    # SNODAS_GAM_UA_60_40
     comb_map4 <- ((pd_star2) * test_gam) +
       ((1 - pd_star2) * (snodas_april_maps[[i]]))
+
+    #SNODAS_GAM_UA_70_30
+    # comb_map5 <- ((pd_star3) * test_gam) +
+    #   ((1 - pd_star3) * (comb_ua_snodas_maps[[i]]))
 
     # SNODAS_GAM_70_30
     comb_map6 <- ((pd_star3) * test_gam) +
       ((1 - pd_star3) * (snodas_april_maps[[i]]))
 
+    # SNODAS_GAM_UA_80_20
+    # comb_map7 <- ((pd_star4) * test_gam) +
+    #   ((1 - pd_star4) * (comb_ua_snodas_maps[[i]]))
+
     # SNODAS_GAM_80_20
     comb_map8 <- ((pd_star4) * test_gam) +
       ((1 - pd_star4) * (snodas_april_maps[[i]]))
 
+    # SNODAS_GAM_UA_90_10
+    # comb_map9 <- ((pd_star5) * test_gam) +
+    #   ((1 - pd_star5) * (comb_ua_snodas_maps[[i]]))
+
     # SNODAS_GAM_90_10
     comb_map10 <- ((pd_star5) * test_gam) +
       ((1 - pd_star5) * (snodas_april_maps[[i]]))
+
+    # SNODAS_GAM_UA_100_0
+    # comb_map11 <- ((pd_star6) * test_gam) +
+    #   ((1 - pd_star6) * (comb_ua_snodas_maps[[i]]))
 
     # SNODAS_GAM_100_0
     comb_map12 <- ((pd_star6) * test_gam) +
@@ -411,63 +368,88 @@ for (i in 1:(length(snodas_april_maps))) {
 
 
     # Make predictions and compute the R2, RMSE and MAE
+    # predictions <- model %>% predict(test.data)
+    # prediction <- stars::st_extract(comb_map, test.data)$v
+    # predictions <- c(predictions2, prediction2)
+
     prediction3 <- stars::st_extract(comb_map2, test.data)$v
     predictions3 <- c(predictions3, prediction3)
+
+    # prediction4 <- stars::st_extract(comb_map3, test.data)$v
+    # predictions4 <- c(predictions4, prediction4)
 
     prediction5 <- stars::st_extract(comb_map4, test.data)$v
     predictions5 <- c(predictions5, prediction5)
 
+    # prediction6 <- stars::st_extract(comb_map5, test.data)$v
+    # predictions6 <- c(predictions6, prediction6)
+
     prediction7 <- stars::st_extract(comb_map6, test.data)$v
     predictions7 <- c(predictions7, prediction7)
+
+    # prediction8 <- stars::st_extract(comb_map7, test.data)$v
+    # predictions8 <- c(predictions8, prediction8)
 
     prediction9 <- stars::st_extract(comb_map8, test.data)$v
     predictions9 <- c(predictions9, prediction9)
 
+    # prediction10 <- stars::st_extract(comb_map9, test.data)$v
+    # predictions10 <- c(predictions9, prediction9)
+
     prediction11 <- stars::st_extract(comb_map10, test.data)$v
     predictions11 <- c(predictions11, prediction11)
 
+    # prediction12 <- stars::st_extract(comb_map11, test.data)$v
+    # predictions12 <- c(predictions12, prediction12)
+
     prediction13 <- stars::st_extract(comb_map12, test.data)$v
     predictions13 <- c(predictions13, prediction13)
-
+    # j = j + 1
   }
 
   # organize the predictions to be back in the correct order
   april_1_snotel[tf_vector, "CV_GAM_RASTER_PREDS"] <- predictions[order(randomized)]
+  # april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_50_50"] <- predictions2[order(randomized)]
   april_1_snotel[tf_vector, "CV_GAM_SNODAS_50_50"] <- predictions3[order(randomized)]
+  # april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_60_40"] <- predictions4[order(randomized)]
   april_1_snotel[tf_vector, "CV_GAM_SNODAS_60_40"] <- predictions5[order(randomized)]
+  # april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_70_30"] <- predictions6[order(randomized)]
   april_1_snotel[tf_vector, "CV_GAM_SNODAS_70_30"] <- predictions7[order(randomized)]
+  # april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_80_20"] <- predictions8[order(randomized)]
   april_1_snotel[tf_vector, "CV_GAM_SNODAS_80_20"] <- predictions9[order(randomized)]
+  # april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_90_10"] <- predictions10[order(randomized)]
   april_1_snotel[tf_vector, "CV_GAM_SNODAS_90_10"] <- predictions11[order(randomized)]
+  # april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_100"] <- predictions12[order(randomized)]
   april_1_snotel[tf_vector, "CV_GAM_SNODAS_100"] <- predictions13[order(randomized)]
-  april_1_snotel[tf_vector, "CV_RF_RASTER_PREDS"] <- rf_predictions[order(randomized)]
 
   #### Replacing all negative values with 0.
   april_1_snotel[tf_vector, "CV_GAM_RASTER_PREDS"] <- ifelse(april_1_snotel[tf_vector, "CV_GAM_RASTER_PREDS"] < 0,
-                                                             0, april_1_snotel[tf_vector, "CV_GAM_RASTER_PREDS"])
-
-  april_1_snotel[tf_vector, "CV_RF_RASTER_PREDS"] <- ifelse(april_1_snotel[tf_vector, "CV_RF_RASTER_PREDS"] < 0,
-                                                             0, april_1_snotel[tf_vector, "CV_RF_RASTER_PREDS"])
-
+                                                   0, april_1_snotel[tf_vector, "CV_GAM_RASTER_PREDS"])
+  # april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_50_50"] <- ifelse(april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_50_50"] < 0,
+  #                                                               0, april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_50_50"])
   april_1_snotel[tf_vector, "CV_GAM_SNODAS_50_50"] <- ifelse(april_1_snotel[tf_vector, "CV_GAM_SNODAS_50_50"] < 0,
                                                              0, april_1_snotel[tf_vector, "CV_GAM_SNODAS_50_50"])
-
+  # april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_60_40"] <- ifelse(april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_60_40"] < 0,
+  #                                                               0, april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_60_40"])
   april_1_snotel[tf_vector, "CV_GAM_SNODAS_60_40"] <- ifelse(april_1_snotel[tf_vector, "CV_GAM_SNODAS_60_40"] < 0,
                                                              0, april_1_snotel[tf_vector, "CV_GAM_SNODAS_60_40"])
-
+  # april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_70_30"] <- ifelse(april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_70_30"] < 0,
+  #                                                               0, april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_70_30"])
   april_1_snotel[tf_vector, "CV_GAM_SNODAS_70_30"] <- ifelse(april_1_snotel[tf_vector, "CV_GAM_SNODAS_70_30"] < 0,
                                                              0, april_1_snotel[tf_vector, "CV_GAM_SNODAS_70_30"])
-
+  # april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_80_20"] <- ifelse(april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_80_20"] < 0,
+                                                                # 0, april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_80_20"])
   april_1_snotel[tf_vector, "CV_GAM_SNODAS_80_20"] <- ifelse(april_1_snotel[tf_vector, "CV_GAM_SNODAS_80_20"] < 0,
                                                              0, april_1_snotel[tf_vector, "CV_GAM_SNODAS_80_20"])
-
+  # april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_90_10"] <- ifelse(april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_90_10"] < 0,
+  #                                                               0, april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_90_10"])
   april_1_snotel[tf_vector, "CV_GAM_SNODAS_90_10"] <- ifelse(april_1_snotel[tf_vector, "CV_GAM_SNODAS_90_10"] < 0,
                                                              0, april_1_snotel[tf_vector, "CV_GAM_SNODAS_90_10"])
-
+  # april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_100"] <- ifelse(april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_100"] < 0,
+  #                                                             0, april_1_snotel[tf_vector, "CV_GAM_SNODAS_UA_100"])
   april_1_snotel[tf_vector, "CV_GAM_SNODAS_100"] <- ifelse(april_1_snotel[tf_vector, "CV_GAM_SNODAS_100"] < 0,
                                                            0, april_1_snotel[tf_vector, "CV_GAM_SNODAS_100"])
 }
-
-
 
 ################################################################################
 #############        Extracting information at the places          #############
@@ -475,14 +457,17 @@ for (i in 1:(length(snodas_april_maps))) {
 
 
 table(april_1_snotel[, "CV_GAM_RASTER_PREDS"] == 99999)
-
+# table(april_1_snotel[, "CV_GAM_SNODAS_UA_50_50"] == 99999)
 table(april_1_snotel[, "CV_GAM_SNODAS_50_50"] == 99999)
-
+# table(april_1_snotel[, "CV_GAM_SNODAS_UA_60_40"] == 99999)
 table(april_1_snotel[, "CV_GAM_SNODAS_60_40"] == 99999)
-
+# table(april_1_snotel[, "CV_GAM_SNODAS_UA_70_30"] == 99999)
 table(april_1_snotel[, "CV_GAM_SNODAS_70_30"] == 99999)
+# table(april_1_snotel[, "CV_GAM_SNODAS_UA_80_20"] == 99999)
 table(april_1_snotel[, "CV_GAM_SNODAS_80_20"] == 99999)
+# table(april_1_snotel[, "CV_GAM_SNODAS_UA_90_10"] == 99999)
 table(april_1_snotel[, "CV_GAM_SNODAS_90_10"] == 99999)
+# table(april_1_snotel[, "CV_GAM_SNODAS_UA_100"] == 99999)
 table(april_1_snotel[, "CV_GAM_SNODAS_100"] == 99999)
 table(april_1_snotel$DATE > "2003-04-01" & april_1_snotel$DATE < "2022-05-01")
 april_1_snotel[april_1_snotel$DATE == "2021-04-01", ]
@@ -504,24 +489,21 @@ table(april_1_snotel[, "CV_GAM_SNODAS_100"] == april_1_snotel[, "CV_GAM_SNODAS_U
 # GAM_RASTER_COMB_PREDS CV- CV results of 80% SNODAS 20% UA and GAM
 #GAM_RASTER_COMB_PREDS2_CV - cross validated results of half gam half SNODAS
 
-table(april_1_snotel$CV_GAM_RASTER_PREDS != 99999)
-april_1_snotel[april_1_snotel$CV_GAM_RASTER_PREDS != 99999, ]
+
+april_1_snotel[april_1_snotel$GAM_PREDS != 99999, ]
+
+
 
 ################################################################################
 #############        Extracting information at the places          #############
 ################################################################################
 
 april_1_snotel$SNODAS_VALUE <- 99999
-april_1_snotel$UA_VALUE <- 99999
-april_1_snotel$DAYMET_VALUE <- 99999
+# april_1_snotel$UA_VALUE <- 99999
 # april_1_snotel$UA_VALUE <- ifelse(april_1_snotel$UA_VALUE == 99999, NA, april_1_snotel$UA_VALUE)
 # april_1_snotel[, "FULL_GAM_VALUE"] <- 99999
 # april_1_snotel[, "FULL_COMB_VALUE"] <- 99999
 # april_1_snotel[, "FULL_GAM_SNODAS_VALUE"] <- 99999
-
-table(april_1_snotel$SNODAS_VALUE == 99999)
-table(april_1_snotel$UA_VALUE == 99999)
-table(april_1_snotel$DAYMET_VALUE == 99999)
 
 # set.seed(123)
 for (i in 1:(length(snodas_april_maps))) {
@@ -543,84 +525,18 @@ for (i in 1:(length(snodas_april_maps))) {
   names(snodas_april_maps[[i]]) <- "SNODAS"
   april_1_snotel[tf_vector, "SNODAS_VALUE"] <- stars::st_extract(snodas_april_maps[[i]], data)$SNODAS
 
-
   # april_1_snotel[tf_vector, "FULL_GAM_VALUE"] <- stars::st_extract(gam_raster[[i]], data)$MODEL_PRED
   # april_1_snotel[tf_vector, "FULL_COMB_VALUE"] <- stars::st_extract(comb_maps[[i]], data)$v
   # april_1_snotel[tf_vector, "FULL_GAM_SNODAS_VALUE"] <- stars::st_extract(sno_gam, data)$v
-
-  # Adding UA
-  if (i < 18) {
-    april_1_snotel[tf_vector, "UA_VALUE"] <- stars::st_extract(ua_april_maps[, , , paste0("SWE_04_01_", years[i])], data)$ua_ut_april1.tif
-  }
+  #
+  # april_1_snotel[tf_vector, "UA_VALUE"] <- stars::st_extract(ua_april_maps[, , , paste0("SWE_04_01_", years[i])], data)$ua_ut_april1.tif
 
 }
 
-april_1_snotel_2004 <- april_1_snotel[april_1_snotel$DATE >= "2004-04-01", ]
-
-
-# Download Daymet data for all the stations -------------------------------
-
-library(daymetr)
-head(april_1_snotel_data)
-
-# Website: https://www.statology.org/select-first-row-in-group-dplyr/#:~:text=Often%20you%20may%20want%20to%20select%20the%20first,df%20%25%3E%25%20group_by%28group_var%29%20%25%3E%25%20arrange%28values_var%29%20%25%3E%25%20filter%28row_number%20%28%29%3D%3D1%29
-new_df <- april_1_snotel_2004 %>%
-  group_by(ID) %>%
-  arrange(LATITUDE, LONGITUDE) %>%
-  filter(row_number ()==1)
-
-# dim(new_df)
-# length(unique(april_1_snotel_2004$ID))
-
-daymet_list <- vector("list", length(new_df$ID))
-for (i in 1:length(daymet_list)) {
-  daymet_data <- download_daymet(site = new_df$ID[i],
-                                 lat = new_df$LATITUDE[i],
-                                 lon = new_df$LONGITUDE[i],
-                                 start = 2004,
-                                 end = 2021,
-                                 internal = TRUE,
-                                 simplify = TRUE)
-
-  # Just get the SWE values
-  daymet_list[[i]] <- daymet_data %>%
-    filter(measurement == "swe..kg.m.2.")
-}
-
-# adding Daymet estimates to april_1_snotel_2004 ---------------------------------------------------------
-# initialize a vector for daymet
-april_1_snotel_2004$DAYMET_VALUE <- 999999
-
-table(april_1_snotel_2004$DAYMET_VALUE == 999999)
-april_1_snotel_2004[april_1_snotel_2004$DAYMET_VALUE == 999999, ]
-
-for (i in 1:length(april_1_snotel_2004$DATE)) {
-  year <- lubridate::year(april_1_snotel_2004$DATE[i])
-  num_of_list <- which(april_1_snotel_2004$ID[i] == new_df$ID)
-
-  a1_day <- ifelse(year %in% seq(2004, 2022, 4), 92, 91)
-  april_1_snotel_2004$DAYMET_VALUE[i] <- daymet_list[[num_of_list]][daymet_list[[num_of_list]]$year == year &
-                                                                      daymet_list[[num_of_list]]$yday == a1_day, ]$value
-}
-
-# double check and make sure only 2022 is blank
-table(april_1_snotel_2004$daymet_value == 999999)
-april_1_snotel_2004[april_1_snotel_2004$daymet_value == 999999, ]
-
-
-# Not needed --------------------------------------------------------------
-
-
-
-
-
-# writing to a CSV --------------------------------------------------------
-
-tail(april_1_snotel)
-# write.csv(april_1_snotel, file = "deprecated/station_info_20221126.csv")
-# april_1_snotel <- read.csv("deprecated/station_info_123.csv")
-# april_1_snotel <- read.csv("deprecated/station_info_123_2.csv")
-# april_1_snotel <- read.csv("deprecated/station_info_1234.csv")
+# write.csv(april_1_snotel, file = "station_info_123_2.csv")
+april_1_snotel <- read.csv("station_info_123.csv")
+# april_1_snotel <- read.csv("station_info_123_2.csv")
+# april_1_snotel <- read.csv("station_info_1234.csv")
 
 april_1_snotel_2003 <- april_1_snotel[(april_1_snotel$DATE > "2003-04-01") &
                                         (april_1_snotel$DATE < "2022-04-01"), ]

@@ -18,6 +18,10 @@
 #'  for the selected date(s), map type(s), and data map that the user provides.
 #'  The downloaded data is stored in the permanent folder.
 #'
+# #' @importFrom utils download.file untar
+# #' @importFrom R.utils gunzip
+# #' @importFrom lubridate day month year
+# #' @importFrom stars read_stars
 #'
 #' @export
 # Modified May 2022 by Logan Schneider
@@ -40,9 +44,11 @@ download_prism <- function(sp_res = "4km", # or 800m
   for (i in 1:length(data)) {
     if (!(data[i] %in% c("ppt", "tmin", "tmax", "tmean",
                          "tdmean", "vpdmin","vpdmax"))) {
-      stop("all data argument(s) must be a valid data option. See examples")
+      stop("all data argument(s) must be a valid data option")
     }
   }
+
+  years <- gsub("-", "", substring(tdate, 1, 4))
 
   # If no end_date, then the start date is the end date as well.
   if (missing(end_date)) {end_date <- start_date}
@@ -57,13 +63,11 @@ download_prism <- function(sp_res = "4km", # or 800m
   # For loops depend on time resolution
   if (t_res == "daily") {
     tdate <- seq(start_date, end_date, by = "day")
-    years <- gsub("-", "", substring(tdate, 1, 4))
     tdate <- gsub("-", "", tdate)
     time_resolution <- "day"
 
   } else if(t_res == "monthly") {
     tdate <- seq(start_date, end_date, by = "month")
-    years <- gsub("-", "", substring(tdate, 1, 4))
 
     # remove the day argument and get rid of the "-" and return a 6 character
     tdate <- gsub("-", "", substring(tdate, 1, 7))
@@ -71,12 +75,9 @@ download_prism <- function(sp_res = "4km", # or 800m
 
   } else if(t_res == "yearly") {
     tdate <- seq(start_date, end_date, by = "year")
-    years <- gsub("-", "", substring(tdate, 1, 4))
     tdate <- unique(gsub("-", "", substring(tdate, 1, 4)))
     time_resolution <- "year"
-
-  } else (stop("all data argument(s) must be a valid data option. See example"))
-
+  }
 
   tsource <- c()
   destination <- c()

@@ -27,27 +27,6 @@ yearly_brick <- stars::st_warp(yearly_brick,
 #
 # #
 names(yearly_brick) <- "Value"
-g2 <- ggplot() +
-  stars::geom_stars(data = yearly_brick) +
-  # geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
-  ggtitle("Daymet SWE predictions") +
-  scale_fill_viridis_c(option = "D",  limits = c(0, 750)) +
-  theme(plot.title = element_text(hjust = 0.5, size = 24),
-        text = element_text(size = 24))
-
-g2
-
-#
-ggsave(filename = paste0("Thesis Daymet map for 2015_NOV202022", ".png"),
-       plot = g2,
-       width = 8.46,
-       height = 8.42,
-       path = paste0(getwd(), "/figures")
-       # width = 8.07,
-       # height = 6.87
-)
-
-
 g <- ggplot() +
   stars::geom_stars(data = yearly_brick) +
   # geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +

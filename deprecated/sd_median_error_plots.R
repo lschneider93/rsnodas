@@ -84,8 +84,6 @@ for (i in 1:(length(years))) {
   sd_CV_GR[i] <- sd((april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                       april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_RASTER_PREDS))
 
-
-
   sd_CV_S_G_50[i] <- sd((april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
                        april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$CV_GAM_SNODAS_50_50))
   # sd_CV_S_G_UA_50[i] <- sd((april_1_snotel_2003[april_1_snotel_2003$DATE == dates[i], ]$VALUE -
@@ -173,55 +171,31 @@ df <- as.data.frame(cbind(years,
                           median_S
 ))
 
-
-colnames(df) <- c("years", "GAM", "SNODAS_GAM",
+colnames(df) <- c("years", "GAM", "SNO_GAM",
                   # "SNO_GAM_UA",
                   # "UA",
                   "SNODAS")
 
-median(df$SNODAS)
-median(df$GAM)
-median(df$SNODAS_GAM)
-
 ##### JUST the medians
 ldf <- tidyr::gather(df, "SNODAS", "GAM",
                      # "UA",
-                     "SNODAS_GAM",
+                     "SNO_GAM",
                      # "SNO_GAM_UA",
-                     key = "Model Type",
+                     key = "model_type",
                      value = "residual_value")
 
-
-library(RColorBrewer)
-display.brewer.all(colorblindFriendly = TRUE)
-
 # Website: https://ggplot2.tidyverse.org/reference/scale_brewer.html
-g <- ggplot(ldf, aes(y = residual_value, x = years, color = `Model Type`)) +
-  ggtitle("Median of Errors") +
+g <- ggplot(ldf, aes(y = residual_value, x = years, color = model_type)) +
+  ggtitle("Time Series of Median of Errors") +
   geom_line(size = .9) +
-  theme(plot.title = element_text(hjust = 0.5, size = 30),
-        text = element_text(size = 28),
-        legend.title = element_text(size = 32)) +
-  xlab("") + ylab("") +
-  # theme(axis.text.x = element_blank(),
-  #       axis.ticks.x = element_blank(),
-  #       axis.text.y = element_blank(),
-  #       axis.ticks.y = element_blank()) +
+  theme(plot.title = element_text(hjust = 0.5, size = 26),
+        text = element_text(size = 20)) +
   ylab("Residual Value") +
-  scale_color_brewer(palette = "Dark2") +
-  scale_y_continuous(name = "Residual Value",
-                     breaks = c(-10, 0, 10, 20, 30, 40, 50),
-                     limits = c(-10, 50)) +
-  scale_x_continuous("Years", breaks = c(2004, 2006,
-                                         2008, 2010,
-                                         2012, 2014,
-                                         2016, 2018,
-                                         2020, 2022))
-
-# scale_color_manual(values = c("royalblue", "tan4",
-  #                               # "lightsalmon2",
-  #                               "gray0", "green4")) # +
-  # # ylim(c(-50, 210))
+  # scale_color_brewer(palette = "Dark2") +
+  scale_color_manual(values = c("royalblue", "tan4",
+                                # "lightsalmon2",
+                                "gray0", "green4")) # +
+  # ylim(c(-50, 210))
 g
   # "gray0", "springgreen4", lightsalmon2, green4
   # scale_color_brewer() +
@@ -231,9 +205,9 @@ g
 
 ggsave(filename = paste0("Time Series of Median of Errors_100", ".png"),
        plot = g,
-       width = 12.46,
+       width = 8.46,
        height = 8.42,
-       path = paste0(getwd())
+       path = paste0(getwd(), "/figures")
        # width = 8.07,
        # height = 6.87
 )
@@ -249,49 +223,37 @@ df <- as.data.frame(cbind(years,
                           sd_S # length(sd_S)
 ))
 
-colnames(df) <- c("years", "GAM", "SNODAS_GAM",
+colnames(df) <- c("years", "GAM", "SNO_GAM",
                   #"UA",
                   "SNODAS" )#, "SNO_GAM_UA")
-
-median(df$SNODAS)
-median(df$GAM)
-median(df$SNODAS_GAM)
 
 ##### JUST the medians
 ldf <- tidyr::gather(df, "SNODAS", "GAM",
                      # "UA",
-                     "SNODAS_GAM",
+                     "SNO_GAM",
                      # "SNO_GAM_UA",
-                     key = "Model Type",
+                     key = "model_type",
                      value = "residual_value")
 
 # Website: https://ggplot2.tidyverse.org/reference/scale_brewer.html
-g <- ggplot(ldf, aes(y = residual_value, x = years, color = `Model Type`)) +
+g <- ggplot(ldf, aes(y = residual_value, x = years, color = model_type)) +
   geom_line(size = .9) +
-  ggtitle("Standard Deviation of Errors") +
-  # ylab("Residual Value") +
-  theme(plot.title = element_text(hjust = 0.5, size = 30),
-        text = element_text(size = 28),
-        legend.title = element_text(size = 32)) +
-  # theme(axis.text.x = element_blank(),
-  #       axis.ticks.x = element_blank(),
-  #       axis.text.y = element_blank(),
-  #       axis.ticks.y = element_blank()) +
+  theme(plot.title = element_text(hjust = 0.5, size = 24),
+        text = element_text(size = 20)) +
+  ggtitle("Time Series of SD of Errors") +
   ylab("Residual Value") +
-  scale_color_brewer(palette = "Dark2") +
-  # xlab("") + ylab("") +
-  scale_x_continuous("Years", breaks = c(2004, 2006,
-                                         2008, 2010,
-                                         2012, 2014,
-                                         2016, 2018,
-                                         2020, 2022))
+  # ylim(c(-25, 210)) +
+  scale_color_manual(values = c("royalblue", "tan4",
+                                #"lightsalmon2",
+                                "gray0", "green4")) # +
+  # ylim(c(-25, 210))
 g
 
-ggsave(filename = paste0("TimeSeries_SD_comparison_100.png"),
+ggsave(filename = paste0("TimeSeries_Median_comparison_100.png"),
        plot = g,
-       width = 12.46,
+       width = 8.46,
        height = 8.42,
-       path = paste0(getwd()))
+       path = paste0(getwd(), "/figures"))
 
 
 # Comparing the residual distribution of each.
@@ -326,10 +288,10 @@ for (i in 1:(length(years))) {
     geom_boxplot() +
     ggtitle(paste("Residual Distribution in", years[i])) +
     #scale_color_manual(values = c("black", "blue")) +
-    theme(plot.title = element_text(hjust = 0.5, size = 30),
-          axis.text = element_text(size = 28),
+    theme(plot.title = element_text(hjust = 0.5, size = 24),
+          axis.text = element_text(size = 20),
           # plot.margin = unit(c(.5,.5,.5,.5), 'cm'),
-          axis.title = element_text(size = 32)) +
+          axis.title = element_text(size = 20)) +
     geom_hline(yintercept = 0) +
     ylim(c(-850, 850)) +
     coord_flip()
@@ -337,7 +299,7 @@ for (i in 1:(length(years))) {
 
   ggsave(filename = paste0("residual_boxplots_100", years[i], ".png"),
          plot = g,
-         width = 12.46,
+         width = 8.46,
          height = 8.42,
          path = paste0(getwd(), "/figures"))
 

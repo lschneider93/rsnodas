@@ -350,7 +350,6 @@ for (i in 1:length(april_1_snotel_data$ID)) {
   st_info <- april_1_snotel_data$ID[i] == ghcnd_station_info$ID
   april_1_snotel_data[, 'LONGITUDE'][i] <- ghcnd_station_info[st_info, "LONGITUDE"]
   april_1_snotel_data[, "LATITUDE"][i] <- ghcnd_station_info[st_info, "LATITUDE"]
-  april_1_snotel_data[, "ELEVATION"][i] <- ghcnd_station_info[st_info, "ELEVATION"]
   april_1_snotel_data[, "NAME"][i] <- ghcnd_station_info[st_info, "NAME"]
 
   # annual Normals
