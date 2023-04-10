@@ -6,3 +6,4 @@ Data
 ^data-raw$
 ^deprecated$
 ^vignette$
+^figures

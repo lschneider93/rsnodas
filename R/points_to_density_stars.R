@@ -21,7 +21,7 @@
 #' maps into a list and combines them all into a RasterBrick.
 #'
 #' @importFrom spatstat.geom as.ppp
-#' @importFrom spatstat.core density.ppp
+#' @importFrom spatstat.explore density.ppp
 #' @importFrom sf st_as_sf st_crs st_transform st_geometry
 #' @importFrom stars read_stars st_warp st_as_stars
 #' @importFrom terra terrain rast vect extract
@@ -67,8 +67,8 @@ points_to_density_stars <- function(sp_points,# = april_df_ghcnd[[17]],
   utahPPP <- spatstat.geom::as.ppp(sf::st_geometry(utahPP))
 
   # here is where we can change the weights function or max weight
-  dens.pts <- max_weight * (spatstat.core::density.ppp(utahPPP, sigma = sigma) /
-                              max(spatstat.core::density.ppp(utahPPP, sigma = sigma)))
+  dens.pts <- max_weight * (spatstat.explore::density.ppp(utahPPP, sigma = sigma) /
+                              max(spatstat.explore::density.ppp(utahPPP, sigma = sigma)))
 
   # Covert to a sf with crs of the raster_template
   stars_density <- stars::st_as_stars(dens.pts,
@@ -96,7 +96,7 @@ points_to_density_stars <- function(sp_points,# = april_df_ghcnd[[17]],
   x <- sf::st_as_sf(stars_density)$values
 
   x2 <- data.frame(x, breaks = cut(x, breaks = 10, include.lowest = TRUE))
-  table(x2$breaks)
+  # table(x2$breaks)
   sf::st_as_sf(stars_density)$values
   t <- terra::rast(stars_density)
 

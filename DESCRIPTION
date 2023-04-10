@@ -17,7 +17,7 @@ Imports:
     methods,
     mgcv,
     sf,
-    spatstat.core,
+    spatstat.explore,
     spatstat.geom,
     terra,
     dplyr,
