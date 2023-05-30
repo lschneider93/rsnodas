@@ -1,7 +1,7 @@
 ---
 title: "rsnodas vignette"
 author: Logan Schneider
-date: "July 12, 2022"
+date: "May 16, 2023"
 output: 
     bookdown::pdf_document2:
     includes:
@@ -50,28 +50,30 @@ The following table lists the data products and spatial resolution of each data 
     \hline
      \textbf{Data Source} & \textbf{Resolution} & \textbf{Variables available}  \\ 
      \hline
-      &  &    Snow water equivalent (SWE), Snow Depth (SnD) \\
-      &  &      Snow Melt runoff (SM), Precipitation (Ppt), \\
-     SNODAS & 1 km & Sublimation from Snow pack (SSP)  \\
+      &  &    Snow water equivalent (SWE), Snow Depth (SnD), \\
+      &  &      Snow Melt runoff (SM), Precipitation (PPT), \\
+     SNODAS & 1 km & Sublimation from Snow pack (SSP),  \\
       &  &  Sublimation of blowing snow (SBS), \\
       &  &   Snow pack Temperature (SPT) \\
-     \hline
-      &  &  \\
-     University of Arizona (UA) & 4 km & SWE, SnD  \\
-      &  &  \\
-     \hline
+      \hline
        &  &  \\
-      &  & PPT, Elevation (Elev), mean dew point (TDmean)\\
-      PRISM & 4 km  & Min/Max vapor pressure deficit (VPmin and VPDmax) \\
+      &  & PPT, Elevation (Elev), Mean dew point (TDmean), \\
+      PRISM & 4 km  & Min/Max vapor pressure deficit (VPmin and VPDmax), \\
        & 800 m$^{\ast}$ & Min/Max Temperature (Tmin and Tmax) \\
-        &  & total global shortwave solar radiation (SolTol) \\
+        &  & Total global shortwave solar radiation (SOLTOTAL) \\
+     \hline
+      &  &  \\
+     UA & 4 km & SWE and SnD  \\
+      &  &  \\
      \hline
         &  & \\
-      Daymet & 1 km &  PPT, SWE, Shortwave radiation (SR)  \\
-       &  & Tmin, Tmax, Water vapor pressure (VP)\\
+      Daymet & 1 km &  Tmin, Tmax, PPT, SWE,   \\
+       &  &  Shortwave radiation (SR), Water vapor pressure (VP)\\
      \hline
 \end{tabular}\\
+$^{\ast}$maps available at 800 meter resolution for a fee.
 \end{center}
+
 
 This vignette uses functions from \texttt{tidyverse}, \texttt{ggplot2}, \texttt{sf}, and the \texttt{stars} package and will be loaded now.
 
@@ -79,7 +81,6 @@ This vignette uses functions from \texttt{tidyverse}, \texttt{ggplot2}, \texttt{
 library(tidyverse)
 library(sf)
 library(stars)
-library(ggplot2)
 '%>%' <- magrittr::'%>%'
 ```
 
@@ -112,14 +113,14 @@ The function `download_snodas` allows us to choose the variables we want to down
 
 
 ```{r snodas, echo = TRUE, eval = TRUE}
-# Download Snodas SWE data for April 1st in 2021 and 2022
+# Download Snodas SWE data for April 1st in 2021 
 snodas_2021 <- download_snodas(dates = format_dates(day = 1,
                                                     month = 4,
                                                     year = 2021),
                 masked = TRUE,
                 overwrite = TRUE,
                 remove_zip = TRUE,
-                data_saved = c('swe'),
+                data_saved = "swe",
                 out_dir = paste0(getwd(), "/snodas_data"),
                 GTiff = FALSE) #
 ```
@@ -136,18 +137,22 @@ ut_map <- maps::map("state", plot = FALSE, fill = TRUE) %>%
   dplyr::filter(ID == "utah") %>%
   sf::st_transform(crs = sf::st_crs(snodas_2021[[1]]))
 
-# Crop the maps to just the state of utah and name the values to be "Value"
+# Crop the maps to just the state of utah and name the values to be "SWE Value"
 snodas_ut_2021 <- sf::st_crop(snodas_2021[[1]], ut_map)
-names(snodas_ut_2021) <- "Value"
+names(snodas_ut_2021) <- "SWE\nValue"
 
-# Plot SNODAS April 1st 2015 SWE map of Utah with blue outline
+# Plot SNODAS April 1st 2021 SWE map of Utah with blue outline
 ggplot() + 
   stars::geom_stars(data = snodas_ut_2021) +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
   ggtitle("2021 SNODAS SWE predictions") + 
-  scale_fill_viridis_c(option = "A") + 
-  theme(plot.title = element_text(hjust = 0.5, size = 18),
-        text = element_text(size = 14))
+  scale_fill_viridis_c(option = "A", limits = c(0, 850), na.value = "white") +
+  labs(x = "Longitude", y = "Latitude") +
+  theme(plot.title = element_text(hjust = 0.5, size = 16),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        text = element_text(size = 13),
+        legend.position = "bottom")
+
 ```
 
 ## Download PRISM climate data
@@ -182,7 +187,7 @@ The `data-raw` folder contains an script titled `DATASET` that shows how to down
 ```
 
 ```{r snotel2, eval = TRUE, echo = TRUE}
-# april 1st data for SNOTEL stations in Utah and subset to just April 1st, 2014.
+# april 1st data for SNOTEL stations in Utah and subset to just April 1st, 2021.
 snotel_ut <- rsnodas::april_1_snotel_data
 snotel_ut_2021 <- snotel_ut[snotel_ut$DATE == "2021-04-01", ]
 ```
@@ -211,17 +216,14 @@ The following code creates a GAM with the SNOTEL station information using March
 ```{r gam2, eval = TRUE, echo = TRUE}
 # This allows users to explore using different models with the monthly precipitation 2021. 
 model <- mgcv::gam(data = snotel_ut_2021,
-                   VALUE ~ s(LONGITUDE, LATITUDE, bs = "sos", k = 25) +                          
-                  s(ppt_2021_03),
-                method = "REML")
+                   VALUE ~ s(LONGITUDE, LATITUDE, bs = "sos", k = 25) + s(ppt_2021_03),
+                   method = "REML")
 
 # This is another example of a model that uses elevation, slope and precipitation.
 # NOTE: In order to run this You MUST download elevation and store it in the same folder.
 # model <- mgcv::gam(data = snotel_ut_2021,
-#                    VALUE ~ s(LONGITUDE, LATITUDE, bs = "sos", k = 25) +                          
-#                   s(ppt_2021_02) + s(slope) + 
-#                   s(elevation),
-#                 method = "REML")
+#                    VALUE ~ s(LONGITUDE, LATITUDE, bs = "sos", k = 25) + s(ppt_2021_02) + 
+#                      s(slope) + s(elevation), method = "REML")
 ```
 
 The final step predict the output with the variables throughout the area of interest and create a gridded output of predictions.  This is accomplished by using the `df_to_raster` that takes the previously created model and data frame to create a raster.  
@@ -234,13 +236,18 @@ gam_rast <- df_to_raster(model = model,
                          data_frame = gam_2021,
                          raster_template = snodas_ut_2021)
 
+# Crop the map to just the state of utah and name the values to be "SWE Value"
+gam_rast <- sf::st_crop(gam_rast, ut_map)
+names(gam_rast) <- "SWE\nValue"
+
+
 ggplot() + 
   stars::geom_stars(data = gam_rast) +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
   ggtitle("2021 GAM SWE predictions") + 
-  scale_fill_viridis_c(option = "A") + 
-  theme(plot.title = element_text(hjust = 0.5, size = 16),
-        text = element_text(size = 12))
+  scale_fill_viridis_c(option = "A", limits = c(0, 850), na.value = "white") +
+  theme_void() +
+  theme(legend.position = "bottom")
 
 ```
 
@@ -258,18 +265,22 @@ dens_2021 <- points_to_density_stars(sp_points = snotel_ut_2021,
                                      sigma = 15000,
                                      max_weight = 1,
                                      flat_crs = "+proj=utm + zone=12 + datum=WGS84")
+
+# Crop the map to just the state of utah and name the values to be "SWE Value"
+dens_2021 <- sf::st_crop(dens_2021, ut_map)
 names(dens_2021) <- "Weights"
 
 ggplot() + 
   stars::geom_stars(data = dens_2021) +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
   ggtitle("2021 Station Density") + 
-  scale_fill_viridis_c(option = "B") + 
-  theme(plot.title = element_text(hjust = 0.5, size = 18),
-        text = element_text(size = 12))
+  scale_fill_viridis_c(option = "D", na.value = "white") + 
+  theme_void() +
+  theme(legend.position = "bottom")
+
 
 ```
-It is important to note that the station density follows the Wasatch Mountains.  The data collected from SNOTEL stations are important to predicting how much water is contained in the Snowpacks for flood forecasting and water management. Therefore, it is important that we understand how much water is in the mountain snowpacks.
+It is important to note that the station density follows the Wasatch Mountains.  The data collected from SNOTEL stations are important to predicting how much water is contained in the snowpacks for flood forecasting and water management. Therefore, it is important that we understand how much water is in the mountain snowpacks.
 
 ## Ensemble SNODAS and GAM predictions
 
@@ -282,14 +293,21 @@ comb_map <- blend_raster(raster_sate = snodas_ut_2021,
                          raster_land = gam_rast,
                          weights = dens_2021)
 
-names(comb_map) <- "Value"
+# Crop the map to just the state of utah and name the values to be "SWE Value"
+comb_map <- sf::st_crop(comb_map, ut_map)
+names(comb_map) <- "SWE\nValue"
+
+
 ggplot() + 
   stars::geom_stars(data = comb_map) +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
   ggtitle("2021 Ensemble Map") + 
-  scale_fill_viridis_c(option = "B") + 
-  theme(plot.title = element_text(hjust = 0.5, size = 18),
-        text = element_text(size = 12))
+  scale_fill_viridis_c(option = "B", limits = c(0, 850), na.value = "white") + 
+  labs(x = "Longitude", y = "Latitude") +
+  theme_void() +
+  theme(legend.position = "none")
+
+
 
 ```
 
