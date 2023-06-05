@@ -25,7 +25,7 @@ header-includes:
 # - https://bookdown.org/yihui/rmarkdown-cookbook/hide-one.html
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE,
                       message = FALSE, results = TRUE)
-'%>%' <- magrittr::'%>%'
+"%>%" <- magrittr::"%>%"
 library(rsnodas)
 library(ggplot2)
 ```
@@ -59,7 +59,7 @@ The following table lists the data products and spatial resolution of each data 
        &  &  \\
       &  & PPT, Elevation (Elev), Mean dew point (TDmean), \\
       PRISM & 4 km  & Min/Max vapor pressure deficit (VPmin and VPDmax), \\
-       & 800 m$^{\ast}$ & Min/Max Temperature (Tmin and Tmax) \\
+       & 800 m$^{\ast}$ & Min/Max Temperature (Tmin and Tmax), \\
         &  & Total global shortwave solar radiation (SOLTOTAL) \\
      \hline
       &  &  \\
@@ -81,7 +81,7 @@ This vignette uses functions from \texttt{tidyverse}, \texttt{ggplot2}, \texttt{
 library(tidyverse)
 library(sf)
 library(stars)
-'%>%' <- magrittr::'%>%'
+"%>%" <- magrittr::"%>%"
 ```
 
 ## Installation
@@ -113,7 +113,7 @@ The function `download_snodas` allows us to choose the variables we want to down
 
 
 ```{r snodas, echo = TRUE, eval = TRUE}
-# Download Snodas SWE data for April 1st in 2021 
+# Download Snodas SWE data for April 1st in 2021
 snodas_2021 <- download_snodas(dates = format_dates(day = 1,
                                                     month = 4,
                                                     year = 2021),
@@ -128,8 +128,6 @@ snodas_2021 <- download_snodas(dates = format_dates(day = 1,
 After downloading SNODAS, you can crop it to the area or state of interest.  These next portion of code gets a shape file of Utah from the \texttt{maps} package, crops the SNODAS map to the state of Utah, and creates a visual by using \texttt{ggplot2}.
 
 ```{r snodas2, echo = TRUE, eval = TRUE, fig.dim=c(4.35, 4.15), fig.align='center'}
-# get the pipe function from magrittr
-"%>%" <- magrittr::"%>%"
 
 # Get an shape of utah from the maps package
 ut_map <- maps::map("state", plot = FALSE, fill = TRUE) %>%
@@ -151,7 +149,7 @@ ggplot() +
   theme(plot.title = element_text(hjust = 0.5, size = 16),
         axis.text.x = element_text(angle = 45, hjust = 1),
         text = element_text(size = 13),
-        legend.position = "bottom")
+        legend.position = "right")
 
 ```
 
@@ -167,8 +165,11 @@ The follow example will download monthly precipitation from January 2021 until M
 
 ```{r prism2, eval = TRUE, echo = TRUE}
 # Example of downloading 4km monthly precipitation maps from Jan. 2021 - March 2021 
-download_prism(sp_res = "4km", data = c("ppt"), t_res = "monthly",
-               start_date = as.Date("2021-01-01"), end_date = as.Date("2021-03-15"),  
+download_prism(sp_res = "4km", 
+               data = c("ppt"), 
+               t_res = "monthly",
+               start_date = as.Date("2021-01-01"), 
+               end_date = as.Date("2021-03-15"),  
                out_dir = paste0(getwd(), "/prism"))
 
 ```
@@ -247,7 +248,7 @@ ggplot() +
   ggtitle("2021 GAM SWE predictions") + 
   scale_fill_viridis_c(option = "A", limits = c(0, 850), na.value = "white") +
   theme_void() +
-  theme(legend.position = "bottom")
+  theme(legend.position = "right")
 
 ```
 
@@ -276,7 +277,7 @@ ggplot() +
   ggtitle("2021 Station Density") + 
   scale_fill_viridis_c(option = "D", na.value = "white") + 
   theme_void() +
-  theme(legend.position = "bottom")
+  theme(legend.position = "right")
 
 
 ```
@@ -301,11 +302,11 @@ names(comb_map) <- "SWE\nValue"
 ggplot() + 
   stars::geom_stars(data = comb_map) +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
-  ggtitle("2021 Ensemble Map") + 
+  ggtitle("2021 Ensemble SWE Predictions") + 
   scale_fill_viridis_c(option = "B", limits = c(0, 850), na.value = "white") + 
   labs(x = "Longitude", y = "Latitude") +
   theme_void() +
-  theme(legend.position = "none")
+  theme(legend.position = "right")
 
 
 
