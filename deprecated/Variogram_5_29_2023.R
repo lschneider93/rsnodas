@@ -1,4 +1,4 @@
-other things to try:
+# other things to try:
   # Convert SNODAS and see if they are spatially correlated? (Create a Variogram)
 
   #### Step 0: Get all of the rasters and Convert to a spatial points data frame

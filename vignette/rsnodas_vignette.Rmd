@@ -1,7 +1,7 @@
 ---
 title: "rsnodas vignette"
 author: Logan Schneider
-date: "May 16, 2023"
+date: "June 14, 2023"
 output: 
     bookdown::pdf_document2:
     includes:
@@ -41,7 +41,7 @@ This rsnodas package allows users to access, clean, visualize, and analyze data 
 \item \href{https://www.ncei.noaa.gov/products/land-based-station/global-historical-climatology-network-dailyGlobal}{\textcolor{blue}{Historical Climatology Network daily} (GHCND)} which provides access to Snow Telemetry (SNOTEL) stations
 \end{itemize}
 
-SNODAS, UA, and PRISM provide data in the form of gridded rasters for the contiguous United States. A summary of the variables and resolution assoicated with each data source is provided in the table below. GHCND provides in-situ measurements, spatial point data, with different temporal scales.  This package focuses on downloading the daily maps and measurements from SNODAS, PRISM, and GHCND. UA data currently can't be downloaded in this package and must be downloaded manually after creating  and signing into an Earthdata account. Please refer to their links for more information about each data product. 
+SNODAS, UA, and PRISM provide data in the form of gridded rasters for the contiguous United States. A summary of the variables and resolution assoicated with each data source is provided in the table below. GHCND provides in-situ measurements, spatial point data, with different temporal scales.  This package focuses on downloading the daily maps and measurements from SNODAS, PRISM, and GHCND. UA data currently can not be downloaded using this R package and must be downloaded manually after creating  and signing into an Earthdata account. Please refer to their links for more information about each data product. 
 
 The following table lists the data products and spatial resolution of each data source. Note that like PRISM allows users to download data at the 4km resolution for free but charge a fee for their maps at a 800m when it is their daily, monthly, or yealy data.  Their 30 year normal (i.e. average) maps are free at the 800m resolution and are currently from 1991-2020.  These 30 year maps change from year to year and are free at the 800m resolution.
 
@@ -81,7 +81,6 @@ This vignette uses functions from \texttt{tidyverse}, \texttt{ggplot2}, \texttt{
 library(tidyverse)
 library(sf)
 library(stars)
-"%>%" <- magrittr::"%>%"
 ```
 
 ## Installation
@@ -137,19 +136,20 @@ ut_map <- maps::map("state", plot = FALSE, fill = TRUE) %>%
 
 # Crop the maps to just the state of utah and name the values to be "SWE Value"
 snodas_ut_2021 <- sf::st_crop(snodas_2021[[1]], ut_map)
-names(snodas_ut_2021) <- "SWE\nValue"
+names(snodas_ut_2021) <- "SWE\nValue\n(mm)"
 
 # Plot SNODAS April 1st 2021 SWE map of Utah with blue outline
 ggplot() + 
   stars::geom_stars(data = snodas_ut_2021) +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
   ggtitle("2021 SNODAS SWE predictions") + 
-  scale_fill_viridis_c(option = "A", limits = c(0, 850), na.value = "white") +
+  scale_fill_viridis_c(option = "A", limits = c(0, 850), na.value = "transparent") +
   labs(x = "Longitude", y = "Latitude") +
   theme(plot.title = element_text(hjust = 0.5, size = 16),
         axis.text.x = element_text(angle = 45, hjust = 1),
         text = element_text(size = 13),
         legend.position = "right")
+
 
 ```
 
@@ -159,7 +159,7 @@ The PRISM climate group has been provided climate maps since 1895 for the Precip
 
 Most of this data from PRISM can be downloaded by utilizing the R package, \texttt{prism}, and more examples and information is available at \href{https://cran.r-project.org/web/packages/prism/vignettes/prism.html}{\textcolor{blue}{this link}}. This package has three separate functions to download daily, monthly, and yearly data and store them in different file paths to keep them organized.
 
-In comparison, we've created the `download_prism` function to seamlessly download daily, monthly, and yearly PRISM climate data and stores all the data files in one directory. This will be optimal for decreasing time and effort later to create a model for prediction. The alternatives are to manually or by use \texttt{prism} functions to download PRISM data and move all PRISM files into one directory. Currently, `download_prism` is limited to only download daily, monthly, or yearly data and can't be used to download PRISM's 30 year normal maps.
+In comparison, we've created the `download_prism` function to seamlessly download daily, monthly, and yearly PRISM climate data and stores all the data files in one directory. This will be optimal for decreasing time and effort later to create a model for prediction. The alternatives are to manually or by use \texttt{prism} functions to download PRISM data and move all PRISM files into one directory. Currently, `download_prism` is limited to only download daily, monthly, or yearly data and can not be used to download PRISM's 30 year normal maps.
 
 The follow example will download monthly precipitation from January 2021 until March 2021 and store in the folder called 'prism_data' in your working directory.
 
@@ -239,7 +239,7 @@ gam_rast <- df_to_raster(model = model,
 
 # Crop the map to just the state of utah and name the values to be "SWE Value"
 gam_rast <- sf::st_crop(gam_rast, ut_map)
-names(gam_rast) <- "SWE\nValue"
+names(gam_rast) <- "SWE\nValue\n(mm)"
 
 
 ggplot() + 
@@ -256,9 +256,9 @@ ggplot() +
 
 We have created a map of SWE estimates throughout Utah using point data and climate information. There are already products, like SNODAS, that estimate SWE throughout the US. SNODAS currently provides the best SWE estimates but is known to struggle predicting in mountainous regions. This map of SWE estimates created using SNOTEL stations has the potential to provide better information in mountain regions. The final map generated by blending SNODAS and the SNOTEL map would not rely solely on one prediction but on SNOTEL information and SNODAS. The goal of blending these maps is to use local information from SNOTEL sites to improve the global predictions that SNODAS provides. The combining of these maps should reduce the variance of the error of the predictions. In order to blend these maps together, we need to blend based on some criteria.  This vignette will blend these two maps based on station density.  
 
-We are going to blend and weight each map by observation or station density. This uses the  `points_to_density_stars` function to produce a raster of weights.  The `sigma` argument will influence the kernel density calculation to include a larger or smaller distance.  Changing the `max_weight` argument gives more weight to the Generalized Additive model or the model from the in-situ measurements. The max weight needs to be within the range of 0-1. This weight is a percentage and won't allow negative percentages or percentages over 100.   
+We are going to blend and weight each map by observation or station density. This uses the  `points_to_density_stars` function to produce a raster of weights.  The `sigma` argument will influence the kernel density calculation to include a larger or smaller distance.  Changing the `max_weight` argument gives more weight to the Generalized Additive model or the model from the in-situ measurements. The max weight needs to be within the range of 0-1. This weight is a percentage that does not allow negative percentages or percentages exceeding 100.   
 
-This creates a density map of all the SNOTEL stations in 2022.
+This creates a density map of all the SNOTEL stations in 2021.
 ```{r density, eval = TRUE, echo = TRUE, fig.dim=c(4.35, 4.15), fig.align='center'}
 dens_2021 <- points_to_density_stars(sp_points = snotel_ut_2021,
                                      coords = c("LONGITUDE", "LATITUDE"),
@@ -285,7 +285,7 @@ It is important to note that the station density follows the Wasatch Mountains. 
 
 ## Ensemble SNODAS and GAM predictions
 
-Lastly, the `blend_raster` function will blend the rasters together with the weights associated. This function could be used to apply weight to any two raster and can be applied to multiple types of spatial problems. It isn't necessary to use the GAM for the land-based predictions if that doesn't apply to your problem. Currently, this function only allows the blending of two maps together. We are going to use all the previous maps to create a final prediction or estimate of SWE.
+Lastly, the `blend_raster` function will blend the rasters together with the weights associated. This function could be used to apply weight to any two raster and can be applied to multiple types of spatial problems. It is not necessary to use the GAM for the land-based predictions if that does not apply to your problem. Currently, this function only allows the blending of two maps together. We are going to use all the previous maps to create a final prediction or estimate of SWE.
 
 This is blending the SNODAS and GAM model based on the SNOTEL station density.
 
@@ -296,7 +296,7 @@ comb_map <- blend_raster(raster_sate = snodas_ut_2021,
 
 # Crop the map to just the state of utah and name the values to be "SWE Value"
 comb_map <- sf::st_crop(comb_map, ut_map)
-names(comb_map) <- "SWE\nValue"
+names(comb_map) <- "SWE\nValue\n(mm)"
 
 
 ggplot() + 

@@ -8,7 +8,7 @@ ggplot() +
   stars::geom_stars(data = t3_ut) +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
   # ggtitle(" ") +
-  scale_fill_viridis_c(option = "A") +
+  scale_color_discrete_sequential(palette = "Dark 2") +
   labs(x = "Longitude", y = "Latitude") +
   theme(plot.title = element_text(hjust = 0.5, size = 16),
         axis.text.x = element_text(angle = 45, hjust = 1),
@@ -68,7 +68,25 @@ g <- ggplot() +
   # ggtitle(paste("2015 SNODAS SWE predictions")) +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
   # scale_fill_viridis_c(option = "A") +
-  scale_fill_viridis_c(option = "A", limits = c(500, 4000)) +
+  # scale_fill_gradientn(colors = brewer.pal(9, "YlGnBu"),
+  #                      limits = c(600, 4000)) +
+  # Option 1:
+  scale_fill_gradientn(name = "Elevation\n(m)",
+                       colors = viridis::cividis(10),
+                       limits = c(600, 4000)) +
+  # Option 2:
+  # scale_fill_gradient(name = "Elevation\n(meters)",
+  #                     limits = c(600, 4000)) +
+  # Option 2:
+  # scale_fill_gradientn(colors = terrain.colors(10),
+  #                      limits = c(600, 4000)) +
+  # Option 3:
+  # scale_fill_gradientn(colors = heat.colors(10),
+  #                      limits = c(600, 4000)) +
+  # Option 2:
+  # scale_fill_gradient(limits = c(600, 4000)) +
+  #
+  # scale_colour_gradient(low = "yellow", high = "red") +
   theme(plot.title = element_text(hjust = 0.5, size = 22),
         axis.text.x = element_text(angle = 45, hjust = 1),
         text = element_text(size = 22))

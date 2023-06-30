@@ -1,6 +1,6 @@
 # Crop the map to just the state of utah and name the values to be "SWE Value"
 comb_map <- sf::st_crop(comb_map, ut_map)
-names(comb_map) <- "SWE\nValue"
+names(comb_map) <- "SWE\nValue\n(mm)"
 
 
 ggplot() +
@@ -18,7 +18,7 @@ ggplot() +
 
 # SNODAS ----------------------------------
 
-names(snodas_april_maps[[17]]) <- "SWE \nValue"
+names(snodas_april_maps[[17]]) <- "SWE\nValue\n(mm)"
 snodas_april_maps[[17]]
 
 plot(snodas_april_maps[[17]])

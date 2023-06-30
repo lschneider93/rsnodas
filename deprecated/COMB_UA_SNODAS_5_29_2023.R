@@ -3,10 +3,10 @@
 
 # combined SNODAS and UA map (5-20-2023) (5/29/2023) ----------------------------------
 # names(ua_april_maps) <- "SWE \nValue"
-names(snodas_april_maps[[12]]) <- "SWE \nValue"
-snodas_april_maps[[12]]
+names(snodas_april_maps[[17]]) <- "SWE \nValue\n(mm)"
+snodas_april_maps[[17]]
 
-plot(snodas_april_maps[[12]])
+plot(snodas_april_maps[[17]])
 
 g <- ggplot() +
   stars::geom_stars(data = snodas_april_maps[[12]]) +
@@ -15,7 +15,7 @@ g <- ggplot() +
   scale_x_continuous("", breaks = NULL) +
   scale_y_continuous(breaks = NULL) +
   # scale_fill_continuous(na.value = "white") +
-  scale_fill_viridis_c(option = "A", limits = c(0, 750), na.value = "white") +
+  scale_fill_viridis_c(option = "A", limits = c(0, 1200), na.value = "white") +
   # labs(x = "", y = "") +
   # theme(plot.title = element_text(hjust = 0.5, size = 24),
   #       text = element_text(size = 1),
@@ -30,7 +30,7 @@ g
 
 
 # UNIVERSITY of Arizona
-names(ua_april_maps) <- "SWE \nValue"
+names(ua_april_maps) <- "SWE \nValue\n(mm)"
 g2 <- ggplot() +
   stars::geom_stars(data = ua_april_maps[, , , paste0("SWE_04_01_", years[12])]) +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
@@ -53,20 +53,20 @@ comb_thesis_plots <- grid.arrange(g, g2, ncol = 2)
 
 # shared legend
 g_legend <- ggplot() +
-  stars::geom_stars(data = snodas_april_maps[[12]]) +
+  stars::geom_stars(data = snodas_april_maps[[17]]) +
   # ggtitle(paste("2015 SNODAS SWE predictions")) +
   geom_sf(data = ut_map, fill = "NA", size = 1, color = "blue") +
   scale_x_continuous("", breaks = NULL) +
   scale_y_continuous(breaks = NULL) +
-  scale_fill_viridis_c(option = "A", limits = c(0, 750)) +
+  scale_fill_viridis_c(option = "A", limits = c(0, 1200)) +
   # labs(x = "", y = "") +
   theme(legend.position = "bottom",
         legend.box = "horizontal",
         text = element_text(size = 1),
         plot.margin = margin(0.1, 0.1, 0.1, 0.1, "cm"),
         legend.key.size = unit(0.85, "cm"),
-        legend.title = element_text(size = 16),
-        legend.text = element_text(size = 16)) +
+        legend.title = element_text(size = 13),
+        legend.text = element_text(size = 13)) +
   guides(colour = guide_legend(title.position = "top", label.position = "top",
                                title.hjust = 0.5, label.hjust = 0.5,
                                keywidth = unit(1, "npc"), keyheight = unit(1, "lines"),
